@@ -1,0 +1,11 @@
+expName,session,condition,date,participant,age,gender,confidence_slider_on,staircasing_on,partner,partner_colour,block_with_partner,trial_in_block,dot_count_low,dot_count_high,stair_value,correct_response,participant_response,participant_correct,participant_confidence,partner_response,partner_correct,partner_confidence,joint_correct,participant_chosen,partner_chosen,next_dot_count_low,next_stair_value,next_dot_count_high,previous_trial_correct
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,False,True,None,None,0,1,200,267,4.2,right,right,True,None,None,None,None,None,None,None,200,4.2,267,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,False,True,None,None,0,2,200,267,4.2,right,right,True,None,None,None,None,None,None,None,200,3.8000000000000003,245,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,False,True,None,None,0,3,200,245,3.8000000000000003,right,right,True,None,None,None,None,None,None,None,200,3.4000000000000004,230,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,False,True,None,None,0,4,200,230,3.4000000000000004,left,left,True,None,None,None,None,None,None,None,200,3.0000000000000004,220,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,False,True,None,None,0,5,200,220,3.0000000000000004,right,right,True,None,None,None,None,None,None,None,200,2.6000000000000005,213,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,True,False,None,None,0,1,200,213,2.6000000000000005,right,right,True,62.0,None,None,None,None,None,None,200,2.6000000000000005,213,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,True,False,None,None,0,2,200,213,2.6000000000000005,right,right,True,79.38,None,None,None,None,None,None,200,2.6000000000000005,213,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,True,False,None,None,0,3,200,213,2.6000000000000005,right,right,True,90.62,None,None,None,None,None,None,200,2.6000000000000005,213,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,True,False,None,None,0,4,200,213,2.6000000000000005,left,left,True,73.25,None,None,None,None,None,None,200,2.6000000000000005,213,True
+Confidence Matching EEG,,s,2021_Sep_28_0113,,,,True,False,None,None,0,5,200,213,2.6000000000000005,right,left,False,88.88,None,None,None,None,None,None,200,2.6000000000000005,213,False

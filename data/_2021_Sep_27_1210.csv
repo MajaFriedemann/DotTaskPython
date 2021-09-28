@@ -1,0 +1,2 @@
+expName,session,condition,date,participant,age,gender,confidence_slider_on,staircasing_on,partner,partner_colour,block_with_partner,trial_in_block,dot_count_low,dot_count_high,stair_value,correct_response,participant_response,participant_correct,participant_confidence,partner_response,partner_correct,partner_confidence,next_dot_count_low,next_stair_value,next_dot_count_high,previous_trial_correct
+Confidence Matching EEG,,None,2021_Sep_27_1210,,,,False,True,None,None,0,0,200,267,4.2,right,left,False,None,None,None,None,200,4.6000000000000005,299,False
