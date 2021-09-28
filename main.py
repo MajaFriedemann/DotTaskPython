@@ -25,10 +25,10 @@ if not dlg.OK:
 # SET EXPERIMENT VARIABLES
 # variables in gv are just fixed
 gv = dict(
-    n_practice_trials=5,
-    n_confidence_practice_trials=5,
-    n_blocks_per_partner=3,
-    n_trials_per_block=3,
+    n_practice_trials=5,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_confidence_practice_trials=5,  # make trial count 5 here
+    n_blocks_per_partner=5,  # make block count 5 here
+    n_trials_per_block=5,  # MAKE TRIAL COUNT 25 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     dot_period=0.3,
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
@@ -42,9 +42,11 @@ gv = dict(
 # variables in info will be saved as participant data
 info = dict(
     expName=expName,
+    curec_ID='R67369/RE001',
     session=expInfo['session (1/2)'],
     condition=expInfo['condition (s/ns)'],
     date=data.getDateStr(),
+    end_date=None,
 
     participant=expInfo['participant nr'],
     age=expInfo['age'],
@@ -55,6 +57,8 @@ info = dict(
     partner=None,
     partner_colour=None,
 
+    trial_count=0,
+    block_count=0,
     block_with_partner=0,
     trial_in_block=0,
     dot_count_low=None,
@@ -107,7 +111,7 @@ datafile.flush()
 # SET UP WINDOW
 win = visual.Window(
     gammaErrorPolicy='ignore',
-    fullscr=True, screen=0,
+    fullscr=True, screen=0, # PROBABLY MAKE SCREEN = 1 HERE
     allowGUI=True, allowStencil=False,
     monitor='testMonitor', color='black',
     blendMode='avg', useFBO=True, units='pix')  # pix is ca 1200 by 1000
@@ -148,7 +152,14 @@ practice_instructions_txt = visual.TextStim(win=win,
                                                  'minutes. You should reach a stable performance level to continue to the '
                                                  'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
 
-confidence_instructions_txt = visual.TextStim(win=win, text='After responding with a left or right click, you will now '
+continue_txt = visual.TextStim(win=win, text='Great, you are now ready to continue!', height=60, pos=[0, 0], wrapWidth=1000,
+                                              color='white')
+
+halfway_txt = visual.TextStim(win=win, text='Great! You are half-way through. \n \n For the second half you will be paired with a different partner.', height=60, pos=[0, 0], wrapWidth=1000,
+                                              color='white')
+
+confidence_instructions_txt = visual.TextStim(win=win, text='From now on, you will indicate your confidence in your decisions. \n \n'
+                                                            'After responding with a left or right click, you will now '
                                                             'indicate your confidence in the decision on a sliding '
                                                             'scale. Hover over the slider bar to change the slider '
                                                             'position - towards the middle f you aren\'t sure of your '
@@ -163,7 +174,7 @@ partner1_observe_instructions_txt = visual.TextStim(win=win,
                                                     text='For the rest of the experiment, you\'ll be doing the task you '
                                                          'just practiced. However, from now on you will see the response'
                                                          ' of another past participant for the same dots-grid. Your '
-                                                         'partner did about as well as you did in the practice trials. '
+                                                         'partner did about as well as you did in the practice trials. \n \n'
                                                          'You will earn points depending on whether your response is '
                                                          'correct and how accurate your confidence judgment was. At the '
                                                          'end of the game, we will take all trials where you indicated, '
@@ -185,7 +196,7 @@ partner2_observe_instructions_txt = visual.TextStim(win=win,
                                                          'who did about as well as you did on the dot task. Different '
                                                          'partner, same rules: After responding with a left or right '
                                                          'click and indicating your confidence on the slider, you will '
-                                                         'see the your partner\'s response for the same dots-grid. You '
+                                                         'see the your partner\'s response for the same dots-grid. \n \n You '
                                                          'will earn points depending on whether your response is correct'
                                                          ' and how accurate your confidence judgment was. At the end of '
                                                          'the game, we will take all trials where you indicated, for '
@@ -291,19 +302,34 @@ def randn_bm(min, max, skew):
 
 # loading partner
 def load_partner():
-    txt1 = visual.TextStim(win=win, text='selecting your partner \n \n .', height=55, pos=[0, 0], color='white')
-    txt2 = visual.TextStim(win=win, text='selecting your partner \n \n . .', height=55, pos=[0, 0], color='white')
-    txt3 = visual.TextStim(win=win, text='selecting your partner \n \n . . .', height=55, pos=[0, 0], color='white')
-    for reps in range(3):
-        txt1.draw()
-        core.wait(0.7)
-        win.flip()
-        txt2.draw()
-        core.wait(0.7)
-        win.flip()
-        txt3.draw()
-        core.wait(0.7)
-        win.flip()
+    visual.TextStim(win=win, text='selecting your partner \n \n .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='selecting your partner \n \n . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='selecting your partner \n \n . . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n . . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='loading the game \n \n .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='loading the game \n \n . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+    visual.TextStim(win=win, text='loading the game \n \n . . .', height=55, pos=[0, 0], color='white').draw()
+    core.wait(0.7)
+    win.flip()
+
 
 
 # questionnaire items
@@ -614,10 +640,11 @@ def draw_dots(win, mouse, gv, info):
 
         info['participant_confidence'] = participant_confidence
         print(participant_confidence)
-        info['trial_score'] = reverse_brier_score(participant_confidence, participant_correct)
+
 
         # PARTNER CHOICE AND CONFIDENCE RATING
         if info['partner'] is not None:
+            info['trial_score'] = reverse_brier_score(participant_confidence, participant_correct)
             partner_confidence = 999
             while partner_confidence > 100:
                 # p correct from normal distribution between 0.6 and 1 (mean 0.8)
@@ -773,8 +800,10 @@ while not mouse.isPressedIn(button):
 info['staircasing_on'] = True
 info['confidence_slider_on'] = False
 info['partner'] = None
+info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_practice_trials']):
     info['trial_in_block'] = trial + 1
+    info['trial_count'] = int(info['trial_count']) + 1
     info = draw_dots(win, mouse, gv, info)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
@@ -782,6 +811,14 @@ for trial in range(gv['n_practice_trials']):
 
 # confidence slider instructions
 win.mouseVisible = True
+continue_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
 confidence_instructions_txt.draw()
 button.draw()
 button_txt.draw()
@@ -795,8 +832,10 @@ while not mouse.isPressedIn(button):
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 info['partner'] = None
+info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_confidence_practice_trials']):
     info['trial_in_block'] = trial + 1
+    info['trial_count'] = int(info['trial_count']) + 1
     info = draw_dots(win, mouse, gv, info)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
@@ -804,6 +843,14 @@ for trial in range(gv['n_confidence_practice_trials']):
 
 # experiment start instructions
 win.mouseVisible = True
+continue_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
 if info['condition'] == 's':
     partner1_strategic_instructions_txt.draw()
 else:
@@ -823,8 +870,8 @@ info['partner_colour'] = random.choice(partner_colours)
 partner_types = ['underconfident', 'overconfident']
 info['partner'] = random.choice(partner_types)
 partner_image = visual.ImageStim(win=win, image="imgs/partner.png", pos=[0, -100])
-partner_oval = visual.Circle(win=win, radius=(100, 165), lineColor=info['partner_colour'], pos=(0, -100))
-loading_partner_txt = visual.TextStim(win=win, text='We have selected your first partner! Their decision and confidence'
+partner_oval = visual.Circle(win=win, radius=(120, 160), lineColor=info['partner_colour'], pos=(0, -100))
+loading_partner_txt = visual.TextStim(win=win, text='We have selected your first partner! \n \n Their decision and confidence'
                                                     ' rating will be indicated with a %s bar.' % (
                                                     info['partner_colour']),
                                       height=th + 10, pos=[0, 180], wrapWidth=1000, color='white')
@@ -845,6 +892,7 @@ info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 for block in range(gv['n_blocks_per_partner']):
     info['block_with_partner'] = block + 1
+    info['block_count'] = int(info['block_count']) + 1
 
     participant_accuracy_counter = 0
     partner_accuracy_counter = 0
@@ -854,8 +902,9 @@ for block in range(gv['n_blocks_per_partner']):
 
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
+        info['trial_count'] = int(info['trial_count']) + 1
         info = draw_dots(win, mouse, gv, info)
-        trial_score = int(info['trial_score'])
+        trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
         datafile.write(dataline + '\n')
@@ -876,7 +925,7 @@ for block in range(gv['n_blocks_per_partner']):
     # break between blocks
     break_txt = visual.TextStim(win=win,
                                 text='Well done on finishing block %i of %i blocks. \n \n You may take a short break if '
-                                     'you like' % (info['block_with_partner'], gv['n_blocks_per_partner']),
+                                     'you like.' % (info['block_count']-2, gv['n_blocks_per_partner']*2),
                                 height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
     if info['condition'] == 's':
         break_txt = visual.TextStim(win=win,
@@ -886,7 +935,7 @@ for block in range(gv['n_blocks_per_partner']):
                                          'your partner\'s accuracy was %i%% \n '
                                          'your joint accuracy was %i%% \n \n'
                                          'Your response was chosen on %i trials. Your partner\'s response was chosen on %i trials.'
-                                         % (info['block_with_partner'], gv['n_blocks_per_partner'],
+                                         % (info['block_count']-2, gv['n_blocks_per_partner']*2,
                                             participant_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             partner_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             joint_accuracy_counter / gv['n_trials_per_block'] * 100,
@@ -924,6 +973,14 @@ p1_partner_work = questionnaire_item('How well do you think you and your partner
 
 # second partner instructions
 win.mouseVisible = True
+halfway_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
 if info['condition'] == 's':
     partner2_strategic_instructions_txt.draw()
 else:
@@ -949,8 +1006,8 @@ else:
     info['partner'] = partner_types[0]
 
 partner_image = visual.ImageStim(win=win, image="imgs/partner.png", pos=[0, -100])
-partner_oval = visual.Circle(win=win, radius=(100, 165), lineColor=info['partner_colour'], pos=(0, -100))
-loading_partner_txt = visual.TextStim(win=win, text='We have selected your first partner! Their decision and confidence'
+partner_oval = visual.Circle(win=win, radius=(120, 160), lineColor=info['partner_colour'], pos=(0, -100))
+loading_partner_txt = visual.TextStim(win=win, text='We have selected your second partner! \n \n Their decision and confidence'
                                                     ' rating will be indicated with a %s bar.' % (
                                                     info['partner_colour']),
                                       height=th + 10, pos=[0, 180], wrapWidth=1000, color='white')
@@ -970,6 +1027,7 @@ info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 for block in range(gv['n_blocks_per_partner']):
     info['block_with_partner'] = block + 1
+    info['block_count'] = int(info['block_count']) + 1
 
     participant_accuracy_counter = 0
     partner_accuracy_counter = 0
@@ -979,8 +1037,9 @@ for block in range(gv['n_blocks_per_partner']):
 
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
+        info['trial_count'] = int(info['trial_count']) + 1
         info = draw_dots(win, mouse, gv, info)
-        trial_score = int(info['trial_score'])
+        trial_score = trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
         datafile.write(dataline + '\n')
@@ -1001,7 +1060,7 @@ for block in range(gv['n_blocks_per_partner']):
     # break between blocks
     break_txt = visual.TextStim(win=win,
                                 text='Well done on finishing block %i of %i blocks. \n \n You may take a short break if '
-                                     'you like' % (info['block_with_partner'], gv['n_blocks_per_partner']),
+                                     'you like.' % (info['block_count']-2, gv['n_blocks_per_partner']*2),
                                 height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
     if info['condition'] == 's':
         break_txt = visual.TextStim(win=win,
@@ -1011,7 +1070,7 @@ for block in range(gv['n_blocks_per_partner']):
                                          'your partner\'s accuracy was %i%% \n '
                                          'your joint accuracy was %i%% \n \n '
                                          'Your response was chosen on %i trials. Your partner\'s response was chosen on %i trials.'
-                                         % (info['block_with_partner'], gv['n_blocks_per_partner'],
+                                         % (info['block_count']-2, gv['n_blocks_per_partner']*2,
                                             participant_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             partner_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             joint_accuracy_counter / gv['n_trials_per_block'] * 100,
@@ -1046,10 +1105,31 @@ p2_confidence = questionnaire_item('How confident do you think your partner was 
 p2_partner_work = questionnaire_item('How well do you think you and your partner worked together in the game?', '\n1\n not at all', '\n10\n very well')
 
 
-# save partner ratings and score and payment in a last dataline
+# score reveal
 overall_score = round(overall_score, 0)
 reward = overall_score*2/100
 
+if info['condition'] == 's':
+    score_txt = visual.TextStim(win=win,
+                                text='Congratulations, you have made %i correct joint decisions in this experiment! \n \n This '
+                                     'equates to a cash bonus of £ %.2f for you :)' % (overall_score, reward),
+                                height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
+else:
+    score_txt = visual.TextStim(win=win,
+                                text='Congratulations, you have reached a score of %i in this experiment! \n \n This '
+                                     'equates to a cash bonus of £ %.2f for you :)' % (overall_score, reward),
+                                height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
+score_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
+
+
+# save partner ratings and score and payment in a last dataline
 info = {key: None for key in info}
 
 info['final_score'] = overall_score
@@ -1063,31 +1143,12 @@ info['p2_likeability'] = p2_likeability
 info['p2_accuracy'] = p2_accuracy
 info['p2_confidence'] = p2_confidence
 info['p2_team_work'] = p2_partner_work
+info['p2_team_work'] = p2_partner_work
+info['end_date'] = data.getDateStr()
 
 dataline = ','.join([str(info[v]) for v in log_vars])
 datafile.write(dataline + '\n')
 datafile.flush()
-
-
-# score reveal
-if info['condition'] == 's':
-    score_txt = visual.TextStim(win=win,
-                                text='Congratulations, you have made %i correct joint decisions in this experiment! \n \n This '
-                                     'equates to a cash bonus of £ %i for you :)' % (overall_score, reward),
-                                height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
-else:
-    score_txt = visual.TextStim(win=win,
-                                text='Congratulations, you have reached a score of %i in this experiment! \n \n This '
-                                     'equates to a cash bonus of £ %i for you :)' % (overall_score, reward),
-                                height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
-score_txt.draw()
-button.draw()
-button_txt.draw()
-win.flip()
-exit_q()
-core.wait(1)
-while not mouse.isPressedIn(button):
-    pass
 
 # thank you
 thanks_txt.draw()
