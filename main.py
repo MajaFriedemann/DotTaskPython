@@ -170,6 +170,23 @@ confidence_instructions_txt = visual.TextStim(win=win, text='From now on, you wi
                                                             'slider.', height=th, pos=[0, 0], wrapWidth=1000,
                                               color='white')
 
+confidence_feedback_instructions_txt = visual.TextStim(win=win, text='From now on, you will indicate your confidence in '
+                                                                     'your decisions and get feedback if your choice was correct or incorrect. \n \n'
+                                                                     'After responding with a left or right click, you '
+                                                                     'will now indicate your confidence in the decision '
+                                                                     'on a sliding scale. Hover over the slider bar to '
+                                                                     'change the slider position - towards the middle '
+                                                                     'if you aren\'t sure of your answer, and towards '
+                                                                     'the left/right side if you\'re confident that the '
+                                                                     'respective side is the correct answer - then '
+                                                                     'click on the slider bar to register your confidence '
+                                                                     'rating. After you respond, you will get feedback '
+                                                                     'about whether the side you picked was correct or '
+                                                                     'incorrect \n \n '
+                                                                     'Press the "next" button to do a few trials with '
+                                                                     'the confidence slider.', height=th, pos=[0, 0], wrapWidth=1000,
+                                              color='white')
+
 partner1_observe_instructions_txt = visual.TextStim(win=win,
                                                     text='For the rest of the experiment, you\'ll be doing the task you '
                                                          'just practiced. However, from now on you will see the response'
@@ -753,6 +770,35 @@ def draw_dots(win, mouse, gv, info):
                 exit_q()
                 core.wait(1)
 
+        # confidence slider is on but partner is none (ie confidence slider practice trials)
+        else:
+            # give feedback if we are in the strategic condition
+            higher_conf_box.pos = (slider_marker.pos[0], slider.pos[1])
+            if info['condition'] == 's':
+                if info['participant_correct']:
+                    higher_conf_box.lineColor = 'lawngreen'
+                    feedback_txt = visual.TextStim(win=win, text='CORRECT', height=35, pos=[0, -90],
+                                                   color='lawngreen')
+                else:
+                    higher_conf_box.lineColor = 'red'
+                    feedback_txt = visual.TextStim(win=win, text='INCORRECT', height=35, pos=[0, -90],
+                                                   color='red')
+                slider.draw()
+                slider_cover.draw()
+                rect_left.draw()
+                rect_right.draw()
+                slider_marker.draw()
+                slider_rating_txt.draw()
+                higher_conf_box.draw()
+                feedback_txt.draw()
+                core.wait(0.5)
+                win.flip()
+                exit_q()
+                core.wait(1)
+
+            else:
+                pass
+
     core.wait(gv['wait_period'])
     return info
 
@@ -819,7 +865,10 @@ exit_q()
 core.wait(1)
 while not mouse.isPressedIn(button):
     pass
-confidence_instructions_txt.draw()
+if info['condition'] == 's':
+    confidence_feedback_instructions_txt.draw()
+else:
+    confidence_instructions_txt.draw()
 button.draw()
 button_txt.draw()
 win.flip()
