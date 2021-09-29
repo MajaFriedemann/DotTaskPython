@@ -3,27 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ba384392-dd7a-40eb-9199-b4c087e0ffb2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/23_2021_Sep_28_1236.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/23_2021_Sep_28_1236.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/2_2021_Sep_28_1154.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/2_2021_Sep_28_1154.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/2_2021_Sep_28_1219.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/2_2021_Sep_28_1219.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1125.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1252.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1252.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1256.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1256.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1259.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1259.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1304.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1304.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1309.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1309.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1310.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1310.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1311.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/_2021_Sep_28_1311.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -124,38 +103,38 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="548" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1625147056371" />
-    <state width="1515" height="123" key="GridCell.Tab.0.bottom" timestamp="1632906922987">
+    <state width="1515" height="123" key="GridCell.Tab.0.bottom" timestamp="1632908268427">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="56" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-115.1920.1160@0.0.1536.824" timestamp="1629728786966" />
-    <state width="1515" height="123" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632906922987" />
+    <state width="1515" height="123" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632908268427" />
     <state width="1899" height="119" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631547573694" />
     <state width="1515" height="230" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.4.1920.1160@0.0.1536.824" timestamp="1632819249430" />
     <state width="1515" height="173" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630507078433" />
     <state width="1515" height="123" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1632831075435" />
-    <state width="1515" height="123" key="GridCell.Tab.0.center" timestamp="1632906922987">
+    <state width="1515" height="123" key="GridCell.Tab.0.center" timestamp="1632908268427">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="56" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-115.1920.1160@0.0.1536.824" timestamp="1629728786966" />
-    <state width="1515" height="123" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632906922987" />
+    <state width="1515" height="123" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632908268427" />
     <state width="1899" height="119" key="GridCell.Tab.0.center/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631547573694" />
     <state width="1515" height="230" key="GridCell.Tab.0.center/0.0.1536.824/-1920.4.1920.1160@0.0.1536.824" timestamp="1632819249430" />
     <state width="1515" height="173" key="GridCell.Tab.0.center/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630507078433" />
     <state width="1515" height="123" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1632831075435" />
-    <state width="1515" height="123" key="GridCell.Tab.0.left" timestamp="1632906922987">
+    <state width="1515" height="123" key="GridCell.Tab.0.left" timestamp="1632908268427">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="56" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-115.1920.1160@0.0.1536.824" timestamp="1629728786966" />
-    <state width="1515" height="123" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632906922987" />
+    <state width="1515" height="123" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632908268427" />
     <state width="1899" height="119" key="GridCell.Tab.0.left/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631547573693" />
     <state width="1515" height="230" key="GridCell.Tab.0.left/0.0.1536.824/-1920.4.1920.1160@0.0.1536.824" timestamp="1632819249429" />
     <state width="1515" height="173" key="GridCell.Tab.0.left/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630507078433" />
     <state width="1515" height="123" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1632831075435" />
-    <state width="1515" height="123" key="GridCell.Tab.0.right" timestamp="1632906922987">
+    <state width="1515" height="123" key="GridCell.Tab.0.right" timestamp="1632908268427">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="56" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-115.1920.1160@0.0.1536.824" timestamp="1629728786966" />
-    <state width="1515" height="123" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632906922987" />
+    <state width="1515" height="123" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632908268427" />
     <state width="1899" height="119" key="GridCell.Tab.0.right/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631547573694" />
     <state width="1515" height="230" key="GridCell.Tab.0.right/0.0.1536.824/-1920.4.1920.1160@0.0.1536.824" timestamp="1632819249430" />
     <state width="1515" height="173" key="GridCell.Tab.0.right/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630507078433" />
@@ -192,17 +171,17 @@
       <screen x="-1920" y="4" width="1920" height="1160" />
     </state>
     <state width="498" height="446" key="SwitcherDM/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631530708869" />
-    <state x="465" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1632905484967">
+    <state x="465" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1632909711458">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632905484967" />
+    <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632909711458" />
     <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824/-1920.4.1920.1160@0.0.1536.824" timestamp="1629370546622" />
     <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630488421637" />
     <state x="465" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1628592274557" />
-    <state x="-1376" y="10" width="1323" height="1137" key="dock-window-1" timestamp="1631613030014">
+    <state x="-1283" y="0" width="1299" height="661" maximized="true" key="dock-window-1" timestamp="1632928193775">
       <screen x="-1920" y="0" width="1920" height="1160" />
     </state>
-    <state x="-1376" y="10" width="1323" height="1137" key="dock-window-1/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1631613030014" />
+    <state x="-1283" y="0" width="1299" height="661" maximized="true" key="dock-window-1/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632928193775" />
     <state x="219" y="0" width="1323" height="830" key="dock-window-1/0.0.1536.824/-1920.4.1920.1160@-1920.4.1920.1160" timestamp="1631543998317" />
     <state x="-1394" y="58" width="1323" height="1173" key="dock-window-1/0.0.1536.824/-1920.57.1920.1160@0.0.1536.824" timestamp="1630514411832" />
     <state x="219" y="0" width="1323" height="830" key="dock-window-1/0.0.1536.824@0.0.1536.824" timestamp="1631270238573" />
@@ -222,9 +201,9 @@
       <screen x="-1920" y="0" width="1920" height="1160" />
     </state>
     <state x="-1749" y="147" width="1299" height="634" key="dock-window-5/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1631811612255" />
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1631811227076">
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1632915998213">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1631811227076" />
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824/-1920.0.1920.1160@0.0.1536.824" timestamp="1632915998213" />
   </component>
 </project>

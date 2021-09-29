@@ -14,6 +14,8 @@ from triggers import triggers
 
 task = setup_triggers()
 
+print('Reminder: Press Q to quit.')
+
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
 expInfo = {'participant nr': '', 'session (1/2)': '', 'condition (s/ns)': '', 'age': '', 'gender (f/m/o)': ''}
