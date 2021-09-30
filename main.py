@@ -755,7 +755,7 @@ def do_trial(win, mouse, gv, info):
 
     # SQUIRCLES TASK
     if info['task'] == 's':
-        info['next_squircle_difference'] = 0.25
+        info['next_squircle_difference'] = int(round((math.e ** stair_value), 0)) / 1000
 
     # DOTS TASK
     else:
