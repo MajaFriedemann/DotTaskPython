@@ -31,7 +31,7 @@ if not dlg.OK:
 # SET EXPERIMENT VARIABLES
 # variables in gv are just fixed
 gv = dict(
-    n_practice_trials=5,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_practice_trials=8,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
     n_trials_per_block=5,  # MAKE TRIAL COUNT 25 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -174,7 +174,7 @@ practice_instructions_squircles_txt = visual.TextStim(win=win,
                                                  'with a "+" sign). The patches will have colours ranging from red to '
                                                  'blue. Your task is to decide which of the two circles of coloured '
                                                  'patches is more red on average, compared to the other one. If you '
-                                                 'think the left circle was more red , you respond with a left '
+                                                 'think the left circle was more red, you respond with a left '
                                                  'mouse-click. If you think the right circle was more red , you respond '
                                                  'with a right mouse-click. The task will start off quite easy but will '
                                                  'become harder as you progress \n \n Press the "next" button to start '
