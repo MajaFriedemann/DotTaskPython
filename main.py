@@ -577,8 +577,7 @@ def do_trial(win, mouse, gv, info):
         # determine squircle parameters
         colour_mean_low = round(random.uniform(0, (0.9 - difference)),
                                 2)  # 0.9 instead of 1.0 because of the variance around the mean
-        colour_mean_high = round(colour_mean_low + difference,
-                                 2)  # this will be max. .09 (i.e. even with sd won't go above 1)
+        colour_mean_high = colour_mean_low + difference  # this will be max. .09 (i.e. even with sd won't go above 1)
 
         info['squircle_value_low'] = colour_mean_low
         info['squircle_value_high'] = colour_mean_high
