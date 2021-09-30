@@ -151,6 +151,9 @@ welcome_txt = visual.TextStim(win=win, text='Welcome to this experiment!', heigh
 welcome2_txt = visual.TextStim(win=win, text='In this experiment, you will be playing a game with dots!', height=50,
                                pos=[0, 0], color='white')
 
+welcome2_squircles_txt = visual.TextStim(win=win, text='In this experiment, you will be playing a game of comparing colours!', height=50,
+                               pos=[0, 0], color='white')
+
 practice_instructions_txt = visual.TextStim(win=win,
                                             text='During this game, you will see two boxes containing dots briefly '
                                                  'flash on either side of the centre of the screen (marked with a "+" sign). '
@@ -160,6 +163,20 @@ practice_instructions_txt = visual.TextStim(win=win,
                                                  'respond with a right mouse-click. The task will start off quite '
                                                  'easy but will become harder as you progress. \n \n Press the "next" '
                                                  'button to start the game. The first phase of the game can take up to 8 '
+                                                 'minutes. You should reach a stable performance level to continue to the '
+                                                 'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
+
+practice_instructions_squircles_txt = visual.TextStim(win=win,
+                                            text='During this game, you will see 2 circles of coloured patches that will'
+                                                 ' briefly flash on either side of the centre of the screen (marked '
+                                                 'with a "+" sign). The patches will have colours ranging from red to '
+                                                 'blue. Your task is to decide which of the two circles of coloured '
+                                                 'patches is more red on average, compared to the other one. If you '
+                                                 'think the left circle was more red , you respond with a left '
+                                                 'mouse-click. If you think the right circle was more red , you respond '
+                                                 'with a right mouse-click. The task will start off quite easy but will '
+                                                 'become harder as you progress \n \n Press the "next" button to start '
+                                                 'the game. The first phase of the game can take up to 8 '
                                                  'minutes. You should reach a stable performance level to continue to the '
                                                  'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
 
@@ -207,7 +224,7 @@ confidence_feedback_instructions_txt = visual.TextStim(win=win,
 partner1_observe_instructions_txt = visual.TextStim(win=win,
                                                     text='For the rest of the experiment, you\'ll be doing the task you '
                                                          'just practiced. However, from now on you will see the response'
-                                                         ' of another past participant for the same dots-grid. Your '
+                                                         ' of another past participant for the stimulus. Your '
                                                          'partner did about as well as you did in the practice trials. \n \n'
                                                          'You will earn points depending on whether your response is '
                                                          'correct and how accurate your confidence judgment was. At the '
@@ -227,10 +244,10 @@ partner1_observe_instructions_txt = visual.TextStim(win=win,
 
 partner2_observe_instructions_txt = visual.TextStim(win=win,
                                                     text='Based on your responses, we will select another participant '
-                                                         'who did about as well as you did on the dot task. Different '
+                                                         'who did about as well as you did on the task. Different '
                                                          'partner, same rules: After responding with a left or right '
                                                          'click and indicating your confidence on the slider, you will '
-                                                         'see the your partner\'s response for the same dots-grid. \n \n You '
+                                                         'see the your partner\'s response for the same stimulus. \n \n You '
                                                          'will earn points depending on whether your response is correct'
                                                          ' and how accurate your confidence judgment was. At the end of '
                                                          'the game, we will take all trials where you indicated, for '
@@ -245,7 +262,7 @@ partner2_observe_instructions_txt = visual.TextStim(win=win,
 partner1_strategic_instructions_txt = visual.TextStim(win=win,
                                                       text='For the rest of the experiment, you\'ll be doing the task you '
                                                            'just practiced. However, from now on you will see the response '
-                                                           'of another past participant for the same dots-grid. Your partner '
+                                                           'of another past participant for the same stimulus. Your partner '
                                                            'did about as well as you did in the practice trials. The '
                                                            'decision that is reported with higher confidence will be selected '
                                                            'as your joint decision. \n \nCritically, your feedback and cash bonus '
@@ -264,10 +281,10 @@ partner1_strategic_instructions_txt = visual.TextStim(win=win,
 
 partner2_strategic_instructions_txt = visual.TextStim(win=win,
                                                       text='Based on your responses, we will select another participant '
-                                                           'who did about as well as you did on the dot task. Different '
+                                                           'who did about as well as you did on the task. Different '
                                                            'partner, same rules: After responding with a left or right '
                                                            'click and indicating your confidence on the slider, you will '
-                                                           'see the your partner\'s response for the same dots-grid. '
+                                                           'see the your partner\'s response for the same stimulus. '
                                                            'Your partner did about as well as you did in the practice trials. '
                                                            'The decision that is reported with higher confidence will be selected '
                                                            'as your joint decision. \n \n Critically, your feedback and cash bonus '
@@ -981,7 +998,10 @@ exit_q()
 core.wait(1)
 while not mouse.isPressedIn(button):
     pass
-welcome2_txt.draw()
+if info['task'] == 's':
+    welcome2_squircles_txt.draw()
+else:
+    welcome2_txt.draw()
 button.draw()
 button_txt.draw()
 win.flip()
@@ -991,7 +1011,10 @@ while not mouse.isPressedIn(button):
     pass
 
 # practice instructions
-practice_instructions_txt.draw()
+if info['task'] == 's':
+    practice_instructions_squircles_txt.draw()
+else:
+    practice_instructions_txt.draw()
 button.draw()
 button_txt.draw()
 win.flip()
