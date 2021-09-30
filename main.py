@@ -73,6 +73,8 @@ info = dict(
     trial_in_block=0,
     dot_count_low=None,
     dot_count_high=None,
+    squircle_value_low=None,
+    squircle_value_high=None,
     stair_value=None,
     correct_response=None,
     participant_response=None,
@@ -367,7 +369,6 @@ def generate_colour_samples(colour_mean, colour_sd, n_circles):
         return new_list
 
     new_list = force_descriptives(list, colour_mean, colour_sd)
-    print(descriptives_list(new_list))
     random.shuffle(new_list)
     return new_list
 
@@ -569,6 +570,7 @@ def do_trial(win, mouse, gv, info):
 
     # SQUIRCLES TASK
     if info['task'] == 's':
+        choice_txt.text = 'Which circle was more red?'
         # CREATE AND DRAW THE SQUIRCLE STIMULI
         difference = info['next_squircle_difference']
 
@@ -578,16 +580,14 @@ def do_trial(win, mouse, gv, info):
         colour_mean_high = round(colour_mean_low + difference,
                                  2)  # this will be max. .09 (i.e. even with sd won't go above 1)
 
-        print(colour_mean_low)
-        print(colour_mean_high)
-        print(difference)
+        info['squircle_value_low'] = colour_mean_low
+        info['squircle_value_high'] = colour_mean_high
 
         if correct_response == "left":
             left_squircle_colours = generate_colour_samples(colour_mean_high, gv['squircles_color_sd'], gv[
                 'squircles_n_circles'])  # one number for each circle with defined mean and sd for the numbers
             right_squircle_colours = generate_colour_samples(colour_mean_low, float(gv['squircles_color_sd']),
                                                              int(gv['squircles_n_circles']))
-            print(right_squircle_colours)
         else:
             left_squircle_colours = generate_colour_samples(colour_mean_low, gv['squircles_color_sd'],
                                                             gv['squircles_n_circles'])
