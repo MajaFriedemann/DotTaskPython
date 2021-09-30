@@ -1,10 +1,13 @@
+# the default is the observational version (set condition to s to get the strategic version)
+# the default is the dots version (set task to s to get the squircles version)
+
 # IMPORT EXTERNAL PACKAGES
 from __future__ import absolute_import, division
 import random
 import os
 import math
 import numpy as np  # whole numpy lib is available, prepend 'np.'
-from psychopy import gui, visual, core, data, event, logging, clock
+from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
 
 # SET UP EEG TRIGGERS
@@ -18,7 +21,8 @@ print('Reminder: Press Q to quit.')
 
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
-expInfo = {'participant nr': '', 'session (1/2)': '', 'condition (s/ns)': '', 'age': '', 'gender (f/m/o)': ''}
+expInfo = {'participant nr': '', 'session (1/2)': '', 'condition (s/ns)': '', 'task (s/d)': '', 'age': '',
+           'gender (f/m/o)': ''}
 expName = 'Confidence Matching EEG'
 dlg = gui.DlgFromDict(dictionary=expInfo, sortKeys=False, title=expName)
 if not dlg.OK:
@@ -32,9 +36,12 @@ gv = dict(
     n_blocks_per_partner=5,  # make block count 5 here
     n_trials_per_block=5,  # MAKE TRIAL COUNT 25 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     dot_period=0.3,
+    squircle_period=0.5,
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
     dot_difference_limits=[1, 100],  # minimum and maximum dots difference
+    squircles_n_circles=8,  # number of circles for the squircles stimuli
+    squircles_color_sd=0.1,  # colour variance for the squircles stimuli
     staircase_breaks=[5, 10],
     # number of trials after which staircasing values change (takes only two values at the moment)
     staircase_step_sizes=[0.4, 0.2, 0.1],
@@ -47,6 +54,7 @@ info = dict(
     curec_ID='R67369/RE001',
     session=expInfo['session (1/2)'],
     condition=expInfo['condition (s/ns)'],
+    task=expInfo['task (s/d)'],
     date=data.getDateStr(),
     end_date=None,
 
@@ -94,6 +102,7 @@ info = dict(
     next_stair_value=4.2,
     # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
     next_dot_count_high=200 + int(round((math.e ** 4.2), 0)),
+    next_squircle_difference=0.25,  # initial squircle colour difference
     previous_trial_correct=False
 )
 
@@ -113,7 +122,7 @@ datafile.flush()
 # SET UP WINDOW
 win = visual.Window(
     gammaErrorPolicy='ignore',
-    fullscr=True, screen=0, # PROBABLY MAKE SCREEN = 1 HERE
+    fullscr=True, screen=1,  # PROBABLY MAKE SCREEN = 1 HERE
     allowGUI=True, allowStencil=False,
     monitor='testMonitor', color='black',
     blendMode='avg', useFBO=True, units='pix')  # pix is ca 1200 by 1000
@@ -154,40 +163,46 @@ practice_instructions_txt = visual.TextStim(win=win,
                                                  'minutes. You should reach a stable performance level to continue to the '
                                                  'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
 
-continue_txt = visual.TextStim(win=win, text='Great, you are now ready to continue!', height=60, pos=[0, 0], wrapWidth=1000,
+continue_txt = visual.TextStim(win=win, text='Great, you are now ready to continue!', height=60, pos=[0, 0],
+                               wrapWidth=1000,
+                               color='white')
+
+halfway_txt = visual.TextStim(win=win,
+                              text='Great! You are half-way through. \n \n For the second half you will be paired with a different partner.',
+                              height=60, pos=[0, 0], wrapWidth=1000,
+                              color='white')
+
+confidence_instructions_txt = visual.TextStim(win=win,
+                                              text='From now on, you will indicate your confidence in your decisions. \n \n'
+                                                   'After responding with a left or right click, you will now '
+                                                   'indicate your confidence in the decision on a sliding '
+                                                   'scale. Hover over the slider bar to change the slider '
+                                                   'position - towards the middle f you aren\'t sure of your '
+                                                   'answer, and towards the left/right side if you\'re confident '
+                                                   'that the respective side is the correct answer - then click'
+                                                   ' on the slider bar to register your confidence rating. '
+                                                   '\n \n Press the "next" button to do a few trials with the confidence '
+                                                   'slider.', height=th, pos=[0, 0], wrapWidth=1000,
                                               color='white')
 
-halfway_txt = visual.TextStim(win=win, text='Great! You are half-way through. \n \n For the second half you will be paired with a different partner.', height=60, pos=[0, 0], wrapWidth=1000,
-                                              color='white')
-
-confidence_instructions_txt = visual.TextStim(win=win, text='From now on, you will indicate your confidence in your decisions. \n \n'
-                                                            'After responding with a left or right click, you will now '
-                                                            'indicate your confidence in the decision on a sliding '
-                                                            'scale. Hover over the slider bar to change the slider '
-                                                            'position - towards the middle f you aren\'t sure of your '
-                                                            'answer, and towards the left/right side if you\'re confident '
-                                                            'that the respective side is the correct answer - then click'
-                                                            ' on the slider bar to register your confidence rating. '
-                                                            '\n \n Press the "next" button to do a few trials with the confidence '
-                                                            'slider.', height=th, pos=[0, 0], wrapWidth=1000,
-                                              color='white')
-
-confidence_feedback_instructions_txt = visual.TextStim(win=win, text='From now on, you will indicate your confidence in '
-                                                                     'your decisions and get feedback if your choice was correct or incorrect. \n \n'
-                                                                     'After responding with a left or right click, you '
-                                                                     'will now indicate your confidence in the decision '
-                                                                     'on a sliding scale. Hover over the slider bar to '
-                                                                     'change the slider position - towards the middle '
-                                                                     'if you aren\'t sure of your answer, and towards '
-                                                                     'the left/right side if you\'re confident that the '
-                                                                     'respective side is the correct answer - then '
-                                                                     'click on the slider bar to register your confidence '
-                                                                     'rating. After you respond, you will get feedback '
-                                                                     'about whether the side you picked was correct or '
-                                                                     'incorrect \n \n '
-                                                                     'Press the "next" button to do a few trials with '
-                                                                     'the confidence slider.', height=th, pos=[0, 0], wrapWidth=1000,
-                                              color='white')
+confidence_feedback_instructions_txt = visual.TextStim(win=win,
+                                                       text='From now on, you will indicate your confidence in '
+                                                            'your decisions and get feedback if your choice was correct or incorrect. \n \n'
+                                                            'After responding with a left or right click, you '
+                                                            'will now indicate your confidence in the decision '
+                                                            'on a sliding scale. Hover over the slider bar to '
+                                                            'change the slider position - towards the middle '
+                                                            'if you aren\'t sure of your answer, and towards '
+                                                            'the left/right side if you\'re confident that the '
+                                                            'respective side is the correct answer - then '
+                                                            'click on the slider bar to register your confidence '
+                                                            'rating. After you respond, you will get feedback '
+                                                            'about whether the side you picked was correct or '
+                                                            'incorrect \n \n '
+                                                            'Press the "next" button to do a few trials with '
+                                                            'the confidence slider.', height=th, pos=[0, 0],
+                                                       wrapWidth=1000,
+                                                       color='white')
 
 partner1_observe_instructions_txt = visual.TextStim(win=win,
                                                     text='For the rest of the experiment, you\'ll be doing the task you '
@@ -267,9 +282,12 @@ partner2_strategic_instructions_txt = visual.TextStim(win=win,
 thanks_txt = visual.TextStim(win=win, text='Thank you for completing the study!', height=70, pos=[0, 0], color='white')
 
 qtxt1 = visual.TextStim(win=win, text='What did you think about your partner\n .', height=55, pos=[0, 0], color='white')
-qtxt2 = visual.TextStim(win=win, text='What did you think about your partner\n . .', height=55, pos=[0, 0], color='white')
-qtxt3 = visual.TextStim(win=win, text='What did you think about your partner\n . . .', height=55, pos=[0, 0], color='white')
-qtxt4 = visual.TextStim(win=win, text='What did you think about your partner\n . . . ?', height=55, pos=[0, 0], color='white')
+qtxt2 = visual.TextStim(win=win, text='What did you think about your partner\n . .', height=55, pos=[0, 0],
+                        color='white')
+qtxt3 = visual.TextStim(win=win, text='What did you think about your partner\n . . .', height=55, pos=[0, 0],
+                        color='white')
+qtxt4 = visual.TextStim(win=win, text='What did you think about your partner\n . . . ?', height=55, pos=[0, 0],
+                        color='white')
 
 
 ######################################################################################################################################################
@@ -278,10 +296,77 @@ qtxt4 = visual.TextStim(win=win, text='What did you think about your partner\n .
 
 # HELPER FUNCTIONS
 
+# 20x20 matrix with 0s (no dots) and 1s (dots) in random locations. number of 1s = number of dots
+def dots_matrix(shape, ones):
+    o = np.ones(ones, dtype=int)
+    z = np.zeros(np.product(shape) - ones, dtype=int)
+    board = np.concatenate([o, z])
+    np.random.shuffle(board)
+    return board.reshape(shape)
+
+
+# generate colour samples for the squircles
+def generate_colour_samples(colour_mean, colour_sd, n_circles):
+    # create a list of n numbers between a and b
+    def random_list(n, a, b):
+        list = []
+        for i in range(n):
+            list.append(random.random() * (b - a) + a)
+        return list
+
+    # create a list of random numbers between 1 and 10
+    list = random_list(n_circles, 1, 10)
+
+    # compute mean, sd and the interval range [min, max] of list
+    def descriptives_list(list):
+        leng = len(list)
+        a = float('inf')
+        b = float('-inf')
+        sum = 0
+        for i in range(leng):
+            sum += float(list[i])
+            a = min(a, list[i])
+            b = max(b, list[i])
+        mean = sum / leng
+        sum = 0
+        for i in range(leng):
+            sum += (list[i] - mean) * (list[i] - mean)
+        sd = math.sqrt(sum / (leng - 1))
+        return {
+            'mean': mean,
+            'sd': sd,
+            'range': [a, b]
+        }
+
+    # transform list to have an exact mean and sd
+    def force_descriptives(list, mean, sd):
+        old_descriptives = descriptives_list(list)
+        old_mean = old_descriptives['mean']
+        old_sd = old_descriptives['sd']
+        new_list = []
+        leng = len(list)
+        for i in range(leng):
+            new_list.append(sd * (list[i] - old_mean) / old_sd + mean)
+        return new_list
+
+    new_list = force_descriptives(list, colour_mean, colour_sd)
+    print(descriptives_list(new_list))
+    random.shuffle(new_list)
+    return new_list
+
+
+# turn colour sample values into RGB values from blue to red
+def generate_rgb_values(value):
+    colour_value = [value*255, 0, (1 - value) * 255]
+    return colour_value
+
+
 # add this in to allow exiting the experiment when we are in full screen mode
-def exit_q(keyList=['q']):
+def exit_q(key_list=None):
     # this just checks if anything has been pressed - it doesn't wait
-    keys = event.getKeys(keyList=keyList)
+    if key_list is None:
+        key_list = ['q']
+    keys = event.getKeys(keyList=key_list)
     res = len(keys) > 0
     if res:
         if 'q' in keys:
@@ -297,7 +382,7 @@ def reverse_brier_score(confidence, outcome):
     else:
         o = 1
     f = confidence / 100
-    return (f - o)**2
+    return (f - o) ** 2
 
 
 # function for sampling from normal distribution with given min, max, and skew
@@ -330,13 +415,16 @@ def load_partner():
     visual.TextStim(win=win, text='selecting your partner \n \n . . .', height=55, pos=[0, 0], color='white').draw()
     core.wait(0.7)
     win.flip()
-    visual.TextStim(win=win, text='checking for similar performance levels \n \n .', height=55, pos=[0, 0], color='white').draw()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n .', height=55, pos=[0, 0],
+                    color='white').draw()
     core.wait(0.7)
     win.flip()
-    visual.TextStim(win=win, text='checking for similar performance levels \n \n . .', height=55, pos=[0, 0], color='white').draw()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n . .', height=55, pos=[0, 0],
+                    color='white').draw()
     core.wait(0.7)
     win.flip()
-    visual.TextStim(win=win, text='checking for similar performance levels \n \n . . .', height=55, pos=[0, 0], color='white').draw()
+    visual.TextStim(win=win, text='checking for similar performance levels \n \n . . .', height=55, pos=[0, 0],
+                    color='white').draw()
     core.wait(0.7)
     win.flip()
     visual.TextStim(win=win, text='loading the game \n \n .', height=55, pos=[0, 0], color='white').draw()
@@ -350,14 +438,13 @@ def load_partner():
     win.flip()
 
 
-
 # questionnaire items
 def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='\n10\n very much'):
     rating = visual.RatingScale(win=win, pos=(0, -100), low=1, high=10, stretch=1.4,
                                 marker='circle', markerColor=(0, 0.8, 0.8), showAccept=False, singleClick=True,
                                 tickMarks=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                                 labels=[tick1, '2', '3', '4', '5', '6', '7', '8', '9', tick10])
-    item = visual.TextStim(win, text=item_text, pos=(0, 150), height=th+10, color='white')
+    item = visual.TextStim(win, text=item_text, pos=(0, 150), height=th + 10, color='white')
     while rating.noResponse:
         item.draw()
         rating.draw()
@@ -369,7 +456,7 @@ def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='
 
 
 # DRAW DOTS FUNCTION
-def draw_dots(win, mouse, gv, info):
+def do_trial(win, mouse, gv, info):
     # STIMULI
     fixation = visual.ShapeStim(
         win,
@@ -458,62 +545,123 @@ def draw_dots(win, mouse, gv, info):
     exit_q()
     core.wait(gv['fixation_period'])
 
-    # CREATE AND DRAW THE DOTS GRID
-    # 20x20 matrix with 0s (no dots) and 1s (dots) in random locations. number of 1s = number of dots
-    def dots_matrix(shape, ones):
-        o = np.ones(ones, dtype=int)
-        z = np.zeros(np.product(shape) - ones, dtype=int)
-        board = np.concatenate([o, z])
-        np.random.shuffle(board)
-        return board.reshape(shape)
-
     # determine the correct response and draw the left/right stimulus correspondingly
     response_options = ["left", "right"]
     correct_response = random.choice(response_options)
     info['correct_response'] = correct_response
 
-    dot_count_high = info['next_dot_count_high']
-    dot_count_low = info['next_dot_count_low']
-    if correct_response == "left":
-        dots_matrix_left = dots_matrix([20, 20], dot_count_high)
-        dots_matrix_right = dots_matrix([20, 20], dot_count_low)
+    # SQUIRCLES TASK
+    if info['task'] == 's':
+        # CREATE AND DRAW THE SQUIRCLE STIMULI
+        difference = info['next_squircle_difference']
+
+        # determine squircle parameters
+        colour_mean_low = round(random.uniform(0, (0.9 - difference)),
+                                2)  # 0.9 instead of 1.0 because of the variance around the mean
+        colour_mean_high = round(colour_mean_low + difference,
+                                 2)  # this will be max. .09 (i.e. even with sd won't go above 1)
+
+        print(colour_mean_low)
+        print(colour_mean_high)
+        print(difference)
+
+        if correct_response == "left":
+            left_squircle_colours = generate_colour_samples(colour_mean_high, gv['squircles_color_sd'], gv[
+                'squircles_n_circles'])  # one number for each circle with defined mean and sd for the numbers
+            right_squircle_colours = generate_colour_samples(colour_mean_low, float(gv['squircles_color_sd']),
+                                                             int(gv['squircles_n_circles']))
+            print(right_squircle_colours)
+        else:
+            left_squircle_colours = generate_colour_samples(colour_mean_low, gv['squircles_color_sd'],
+                                                            gv['squircles_n_circles'])
+            right_squircle_colours = generate_colour_samples(colour_mean_high, gv['squircles_color_sd'],
+                                                             gv['squircles_n_circles'])
+
+        circle = visual.Circle(
+            win=win,
+            units="pix",
+            colorSpace='rgb255',
+            fillColor=(255, 255, 255),
+            lineColor=(0, 0, 0),
+            edges=128,
+            radius=22
+        )
+        f = 360 / gv['squircles_n_circles']
+        thetas = [x * f for x in range(360)]
+
+        # right stimulus
+        for i in range(gv['squircles_n_circles']):
+            [pos_x, pos_y] = misc.pol2cart(
+                thetas[i],
+                80
+            )
+            circle.pos = [pos_x + rect_right.pos[0], pos_y + rect_right.pos[1]]
+            fill_colour = generate_rgb_values(right_squircle_colours[i])
+            circle.fillColor = (fill_colour[0], fill_colour[1], fill_colour[2])
+            circle.draw()
+
+        # left stimulus
+        for i in range(gv['squircles_n_circles']):
+            [pos_x, pos_y] = misc.pol2cart(
+                thetas[i],
+                75
+            )
+            circle.pos = [pos_x + rect_left.pos[0], pos_y + rect_left.pos[1]]
+            fill_colour = generate_rgb_values(left_squircle_colours[i])
+            circle.fillColor = (fill_colour[0], fill_colour[1], fill_colour[2])
+            circle.draw()
+
+        # show squircles for stimulus period
+        win.flip()
+        exit_q()
+        core.wait(gv['squircle_period'])
+
+
+    # DOTS TASK
     else:
-        dots_matrix_right = dots_matrix([20, 20], dot_count_high)
-        dots_matrix_left = dots_matrix([20, 20], dot_count_low)
+        # CREATE AND DRAW THE DOTS GRID
+        dot_count_high = info['next_dot_count_high']
+        dot_count_low = info['next_dot_count_low']
+        if correct_response == "left":
+            dots_matrix_left = dots_matrix([20, 20], dot_count_high)
+            dots_matrix_right = dots_matrix([20, 20], dot_count_low)
+        else:
+            dots_matrix_right = dots_matrix([20, 20], dot_count_high)
+            dots_matrix_left = dots_matrix([20, 20], dot_count_low)
 
-    info['dot_count_low'] = dot_count_low
-    info['dot_count_high'] = dot_count_high
+        info['dot_count_low'] = dot_count_low
+        info['dot_count_high'] = dot_count_high
 
-    # draw the dots grids based on the matrices
-    offsets = range(0, 19, 1)
-    row_count = 0
+        # draw the dots grids based on the matrices
+        offsets = range(0, 19, 1)
+        row_count = 0
 
-    # right stimulus
-    for y_offset in offsets:
-        for x_offset in offsets:
-            if dots_matrix_right[y_offset, x_offset] == 1:
-                for stimulus in [dot]:
-                    stimulus.pos = [x_offset * 12 + 100, y_offset * 12]
-                    stimulus.draw()
-        row_count = row_count + 1
+        # right stimulus
+        for y_offset in offsets:
+            for x_offset in offsets:
+                if dots_matrix_right[y_offset, x_offset] == 1:
+                    for stimulus in [dot]:
+                        stimulus.pos = [x_offset * 12 + 100, y_offset * 12]
+                        stimulus.draw()
+            row_count = row_count + 1
 
-    # left stimulus
-    for y_offset in offsets:
-        for x_offset in offsets:
-            if dots_matrix_left[y_offset, x_offset] == 1:
-                for stimulus in [dot]:
-                    stimulus.pos = [x_offset * (-12) - 100, y_offset * 12]
-                    stimulus.draw()
-        row_count = row_count + 1
+        # left stimulus
+        for y_offset in offsets:
+            for x_offset in offsets:
+                if dots_matrix_left[y_offset, x_offset] == 1:
+                    for stimulus in [dot]:
+                        stimulus.pos = [x_offset * (-12) - 100, y_offset * 12]
+                        stimulus.draw()
+            row_count = row_count + 1
 
-    # show dots for dot period
-    rect_right.draw()
-    rect_left.draw()
-    win.flip()
-    exit_q()
-    core.wait(gv['dot_period'])
+        # show dots for stimulus period
+        rect_right.draw()
+        rect_left.draw()
+        win.flip()
+        exit_q()
+        core.wait(gv['dot_period'])
 
-    # remove dots but keep the rectangles
+    # remove stimulus but keep the rectangles
     rect_right.draw()
     rect_left.draw()
     choice_txt.draw()
@@ -588,17 +736,25 @@ def draw_dots(win, mouse, gv, info):
     info['next_stair_value'] = stair_value
     info['previous_trial_correct'] = participant_correct  # only update this variable after we have used it!
 
-    next_dot_count_low = info['dot_count_low']  # stays the same
-    next_dot_count_high = next_dot_count_low + int(round((math.e ** stair_value), 0))
-    # limits for dots difference at 1 and 100
-    if next_dot_count_high < (next_dot_count_low + gv['dot_difference_limits'][0]):
-        next_dot_count_high = next_dot_count_low + gv['dot_difference_limits'][0]
-    elif next_dot_count_high > (next_dot_count_low + gv['dot_difference_limits'][1]):
-        next_dot_count_high = next_dot_count_low + gv['dot_difference_limits'][1]
+    # SQUIRCLES TASK
+    if info['task'] == 's':
+        info['next_squircle_difference'] = 0.25
 
-    info['next_dot_count_low'] = next_dot_count_low
-    info['next_dot_count_high'] = next_dot_count_high
+    # DOTS TASK
+    else:
+        next_dot_count_low = info['dot_count_low']  # stays the same
+        next_dot_count_high = next_dot_count_low + int(round((math.e ** stair_value), 0))
+        # limits for dots difference at 1 and 100
+        if next_dot_count_high < (next_dot_count_low + gv['dot_difference_limits'][0]):
+            next_dot_count_high = next_dot_count_low + gv['dot_difference_limits'][0]
+        elif next_dot_count_high > (next_dot_count_low + gv['dot_difference_limits'][1]):
+            next_dot_count_high = next_dot_count_low + gv['dot_difference_limits'][1]
 
+        info['next_dot_count_low'] = next_dot_count_low
+        info['next_dot_count_high'] = next_dot_count_high
+
+
+    # CONFIDENCE SLIDER
     if info['confidence_slider_on']:
         # ENABLE MOUSE
         win.mouseVisible = True
@@ -659,7 +815,6 @@ def draw_dots(win, mouse, gv, info):
 
         info['participant_confidence'] = participant_confidence
         print(participant_confidence)
-
 
         # PARTNER CHOICE AND CONFIDENCE RATING
         if info['partner'] is not None:
@@ -815,6 +970,7 @@ globalClock = core.Clock()
 mouse = event.Mouse()
 win.mouseVisible = True
 
+
 # RUN EXPERIMENT
 # welcome
 welcome_txt.draw()
@@ -852,7 +1008,7 @@ info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_practice_trials']):
     info['trial_in_block'] = trial + 1
     info['trial_count'] = int(info['trial_count']) + 1
-    info = draw_dots(win, mouse, gv, info)
+    info = do_trial(win, mouse, gv, info)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
     datafile.flush()
@@ -887,7 +1043,7 @@ info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_confidence_practice_trials']):
     info['trial_in_block'] = trial + 1
     info['trial_count'] = int(info['trial_count']) + 1
-    info = draw_dots(win, mouse, gv, info)
+    info = do_trial(win, mouse, gv, info)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
     datafile.flush()
@@ -922,9 +1078,10 @@ partner_types = ['underconfident', 'overconfident']
 info['partner'] = random.choice(partner_types)
 partner_image = visual.ImageStim(win=win, image="imgs/partner.png", pos=[0, -100])
 partner_oval = visual.Circle(win=win, radius=(120, 160), lineColor=info['partner_colour'], pos=(0, -100))
-loading_partner_txt = visual.TextStim(win=win, text='We have selected your first partner! \n \n Their decision and confidence'
-                                                    ' rating will be indicated with a %s bar.' % (
-                                                    info['partner_colour']),
+loading_partner_txt = visual.TextStim(win=win,
+                                      text='We have selected your first partner! \n \n Their decision and confidence'
+                                           ' rating will be indicated with a %s bar.' % (
+                                               info['partner_colour']),
                                       height=th + 10, pos=[0, 180], wrapWidth=1000, color='white')
 partner_image.draw()
 partner_oval.draw()
@@ -954,7 +1111,7 @@ for block in range(gv['n_blocks_per_partner']):
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
         info['trial_count'] = int(info['trial_count']) + 1
-        info = draw_dots(win, mouse, gv, info)
+        info = do_trial(win, mouse, gv, info)
         trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
@@ -976,7 +1133,7 @@ for block in range(gv['n_blocks_per_partner']):
     # break between blocks
     break_txt = visual.TextStim(win=win,
                                 text='Well done on finishing block %i of %i blocks. \n \n You may take a short break if '
-                                     'you like.' % (info['block_count']-2, gv['n_blocks_per_partner']*2),
+                                     'you like.' % (info['block_count'] - 2, gv['n_blocks_per_partner'] * 2),
                                 height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
     if info['condition'] == 's':
         break_txt = visual.TextStim(win=win,
@@ -986,7 +1143,7 @@ for block in range(gv['n_blocks_per_partner']):
                                          'your partner\'s accuracy was %i%% \n '
                                          'your joint accuracy was %i%% \n \n'
                                          'Your response was chosen on %i trials. Your partner\'s response was chosen on %i trials.'
-                                         % (info['block_count']-2, gv['n_blocks_per_partner']*2,
+                                         % (info['block_count'] - 2, gv['n_blocks_per_partner'] * 2,
                                             participant_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             partner_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             joint_accuracy_counter / gv['n_trials_per_block'] * 100,
@@ -1017,10 +1174,12 @@ qtxt4.draw()
 win.flip()
 core.wait(1.4)
 p1_likeability = questionnaire_item('How much did you like your partner?')
-p1_accuracy = questionnaire_item('How accurate do you think your partner was compared to yourself?', '\n1\n much less accurate', '\n10\n much more accurate')
-p1_confidence = questionnaire_item('How confident do you think your partner was compared to yourself?', '\n1\n much less confident', '\n10\n much more confident')
-p1_partner_work = questionnaire_item('How well do you think you and your partner worked together in the game?', '\n1\n not at all', '\n10\n very well')
-
+p1_accuracy = questionnaire_item('How accurate do you think your partner was compared to yourself?',
+                                 '\n1\n much less accurate', '\n10\n much more accurate')
+p1_confidence = questionnaire_item('How confident do you think your partner was compared to yourself?',
+                                   '\n1\n much less confident', '\n10\n much more confident')
+p1_partner_work = questionnaire_item('How well do you think you and your partner worked together in the game?',
+                                     '\n1\n not at all', '\n10\n very well')
 
 # second partner instructions
 win.mouseVisible = True
@@ -1058,9 +1217,10 @@ else:
 
 partner_image = visual.ImageStim(win=win, image="imgs/partner.png", pos=[0, -100])
 partner_oval = visual.Circle(win=win, radius=(120, 160), lineColor=info['partner_colour'], pos=(0, -100))
-loading_partner_txt = visual.TextStim(win=win, text='We have selected your second partner! \n \n Their decision and confidence'
-                                                    ' rating will be indicated with a %s bar.' % (
-                                                    info['partner_colour']),
+loading_partner_txt = visual.TextStim(win=win,
+                                      text='We have selected your second partner! \n \n Their decision and confidence'
+                                           ' rating will be indicated with a %s bar.' % (
+                                               info['partner_colour']),
                                       height=th + 10, pos=[0, 180], wrapWidth=1000, color='white')
 partner_image.draw()
 partner_oval.draw()
@@ -1089,7 +1249,7 @@ for block in range(gv['n_blocks_per_partner']):
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
         info['trial_count'] = int(info['trial_count']) + 1
-        info = draw_dots(win, mouse, gv, info)
+        info = do_trial(win, mouse, gv, info)
         trial_score = trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
@@ -1111,7 +1271,7 @@ for block in range(gv['n_blocks_per_partner']):
     # break between blocks
     break_txt = visual.TextStim(win=win,
                                 text='Well done on finishing block %i of %i blocks. \n \n You may take a short break if '
-                                     'you like.' % (info['block_count']-2, gv['n_blocks_per_partner']*2),
+                                     'you like.' % (info['block_count'] - 2, gv['n_blocks_per_partner'] * 2),
                                 height=th + 10, pos=[0, 40], wrapWidth=1000, color='white')
     if info['condition'] == 's':
         break_txt = visual.TextStim(win=win,
@@ -1121,7 +1281,7 @@ for block in range(gv['n_blocks_per_partner']):
                                          'your partner\'s accuracy was %i%% \n '
                                          'your joint accuracy was %i%% \n \n '
                                          'Your response was chosen on %i trials. Your partner\'s response was chosen on %i trials.'
-                                         % (info['block_count']-2, gv['n_blocks_per_partner']*2,
+                                         % (info['block_count'] - 2, gv['n_blocks_per_partner'] * 2,
                                             participant_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             partner_accuracy_counter / gv['n_trials_per_block'] * 100,
                                             joint_accuracy_counter / gv['n_trials_per_block'] * 100,
@@ -1151,14 +1311,16 @@ qtxt4.draw()
 win.flip()
 core.wait(1.4)
 p2_likeability = questionnaire_item('How much did you like your partner?')
-p2_accuracy = questionnaire_item('How accurate do you think your partner was compared to yourself?', '\n1\n much less accurate', '\n10\n much more accurate')
-p2_confidence = questionnaire_item('How confident do you think your partner was compared to yourself?', '\n1\n much less confident', '\n10\n much more confident')
-p2_partner_work = questionnaire_item('How well do you think you and your partner worked together in the game?', '\n1\n not at all', '\n10\n very well')
-
+p2_accuracy = questionnaire_item('How accurate do you think your partner was compared to yourself?',
+                                 '\n1\n much less accurate', '\n10\n much more accurate')
+p2_confidence = questionnaire_item('How confident do you think your partner was compared to yourself?',
+                                   '\n1\n much less confident', '\n10\n much more confident')
+p2_partner_work = questionnaire_item('How well do you think you and your partner worked together in the game?',
+                                     '\n1\n not at all', '\n10\n very well')
 
 # score reveal
 overall_score = round(overall_score, 0)
-reward = overall_score*2/100
+reward = overall_score * 2 / 100
 
 if info['condition'] == 's':
     score_txt = visual.TextStim(win=win,
@@ -1178,7 +1340,6 @@ exit_q()
 core.wait(1)
 while not mouse.isPressedIn(button):
     pass
-
 
 # save partner ratings and score and payment in a last dataline
 info = {key: None for key in info}
