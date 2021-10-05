@@ -710,6 +710,7 @@ def do_trial(win, mouse, gv, info):
             rect_right.lineWidth = 6
             slider_cover.pos = (-200, -300)
 
+    send_trigger_fast(triggers['response'], task)  # send response trigger
     decision_rt_2 = clock.getTime()
     info['decision_rt'] = decision_rt_2 - decision_rt_1
     info['participant_response'] = choice
@@ -723,6 +724,7 @@ def do_trial(win, mouse, gv, info):
     rect_right.draw()
     rect_left.draw()
     win.flip()
+    send_trigger_fast(0, task)  # reset trigger to 0
     exit_q()
 
     # STAIRCASING
