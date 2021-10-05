@@ -10,26 +10,26 @@ import numpy as np  # whole numpy lib is available, prepend 'np.'
 from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
 
-# SET UP EEG TRIGGERS
-from psychopy import parallel
-from triggers import triggers
+# SET UP EEG TRIGGERS - NOT WORKING
+# from psychopy import parallel
+# from triggers import triggers
 
-port = parallel.ParallelPort(
-    address='')
-reset = 0
-port.setData(reset)
+# port = parallel.ParallelPort(
+#     address='')
+# reset = 0
+# port.setData(reset)
 
+# def send_trigger(code):
+#     port.setData(code)
 
-def send_trigger(code):
-    port.setData(code)
-
-
+# SET UP EEG TRIGGERS - ALSO NOT WORKING
+# from triggers import triggers
 # from daq import (setup_triggers, send_trigger_fast,
 #                  send_trigger_slow, send_trigger)
 # task = setup_triggers()
 
 
-print('Reminder: Press Q to quit.')
+print('Reminder: Press Q to quit.')  # press Q and experiment will quit on next win flip
 
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
