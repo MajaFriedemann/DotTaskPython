@@ -10,26 +10,23 @@ import numpy as np  # whole numpy lib is available, prepend 'np.'
 from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
 
-# SET UP EEG TRIGGERS - NOT WORKING
-# from psychopy import parallel
-# from triggers import triggers
 
-# port = parallel.ParallelPort(
-#     address='')
-# reset = 0
-# port.setData(reset)
+# SET UP EEG TRIGGERS
+from psychopy import parallel
+from triggers import triggers
 
-# def send_trigger(code):
-#     port.setData(code)
+IOport = parallel.ParallelPort(
+    address='0xC050')  # change the address to whatever it is for the port on the computer you are using
+holdvalue = 0  # reset the port to this after every trigger
+IOport.setData(holdvalue)  # initialise the parallel port at 0 here, if not done then it causes problems for some reason
 
-# SET UP EEG TRIGGERS - ALSO NOT WORKING
-# from triggers import triggers
-# from daq import (setup_triggers, send_trigger_fast,
-#                  send_trigger_slow, send_trigger)
-# task = setup_triggers()
+
+def send_trigger(code):
+    IOport.setData(code)
 
 
 print('Reminder: Press Q to quit.')  # press Q and experiment will quit on next win flip
+
 
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
@@ -43,7 +40,7 @@ if not dlg.OK:
 # SET EXPERIMENT VARIABLES
 # variables in gv are just fixed
 gv = dict(
-    n_practice_trials=8,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_practice_trials=5,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
     n_trials_per_block=5,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -129,8 +126,8 @@ if not os.path.exists('data'):
     os.mkdir('data')
 filename = os.path.join('data', '%s_%s' % (info['participant'], info['date']))
 ## Save a log file for detail verbose info
-logFile = logging.LogFile(filename + '.log', level=logging.EXP)
-logging.console.setLevel(0)  # this outputs to the screen, not a file
+# logFile = logging.LogFile(filename + '.log', level=logging.EXP)
+# logging.console.setLevel(0)  # this outputs to the screen, not a file
 
 datafile = open(filename + '.csv', 'w')
 datafile.write(','.join(log_vars) + '\n')
@@ -725,6 +722,7 @@ def do_trial(win, mouse, gv, info):
             rect_right.lineWidth = 6
             slider_cover.pos = (-200, -300)
 
+    send_trigger(triggers['response'])
     decision_rt_2 = clock.getTime()
     info['decision_rt'] = decision_rt_2 - decision_rt_1
     info['participant_response'] = choice
