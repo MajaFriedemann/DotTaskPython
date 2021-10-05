@@ -87,6 +87,9 @@ info = dict(
     participant_chosen=None,
     partner_chosen=None,
 
+    decision_rt=None,
+    confidence_rt=None,
+
     trial_score=None,
     final_score=None,
     reward=None,
@@ -103,7 +106,7 @@ info = dict(
     next_dot_count_low=200,  # fixed low dot count
     next_stair_value=4.2,
     # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
-    next_dot_count_high=200 + int(round((math.e ** 4.2), 0)),
+    next_dot_count_high=200 + int(round((math.e ** 4.2), 0)),  # initial high dot count based on initial stair value
     next_squircle_difference=0.25,  # initial squircle colour difference
     previous_trial_correct=False
 )
@@ -629,6 +632,7 @@ def do_trial(win, mouse, gv, info):
 
         # show squircles for stimulus period
         win.flip()
+        decision_rt_1 = clock.getTime()
         exit_q()
         core.wait(gv['squircle_period'])
 
@@ -674,6 +678,7 @@ def do_trial(win, mouse, gv, info):
         rect_right.draw()
         rect_left.draw()
         win.flip()
+        decision_rt_1 = clock.getTime()
         exit_q()
         core.wait(gv['dot_period'])
 
@@ -704,6 +709,9 @@ def do_trial(win, mouse, gv, info):
             rect_right.lineColor = (0, 0.8, 0.8)
             rect_right.lineWidth = 6
             slider_cover.pos = (-200, -300)
+
+    decision_rt_2 = clock.getTime()
+    info['decision_rt'] = decision_rt_2 - decision_rt_1
     info['participant_response'] = choice
 
     if choice == correct_response:
@@ -836,7 +844,7 @@ def do_trial(win, mouse, gv, info):
         if info['partner'] is not None:
             info['trial_score'] = reverse_brier_score(participant_confidence, participant_correct)
             partner_confidence = 999
-            while partner_confidence > 100:
+            while partner_confidence > 100 or partner_confidence < 50:
                 # p correct from normal distribution between 0.6 and 1 (mean 0.8)
                 pCorrect = randn_bm(0.6, 1, 1)
 
