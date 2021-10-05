@@ -11,11 +11,23 @@ from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
 
 # SET UP EEG TRIGGERS
-from daq import (setup_triggers, send_trigger_fast,
-                 send_trigger_slow, send_trigger)
+from psychopy import parallel
 from triggers import triggers
 
-task = setup_triggers()
+port = parallel.ParallelPort(
+    address='')
+reset = 0
+port.setData(reset)
+
+
+def send_trigger(code):
+    port.setData(code)
+
+
+# from daq import (setup_triggers, send_trigger_fast,
+#                  send_trigger_slow, send_trigger)
+# task = setup_triggers()
+
 
 print('Reminder: Press Q to quit.')
 
@@ -34,9 +46,9 @@ gv = dict(
     n_practice_trials=8,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
-    n_trials_per_block=5,  # MAKE TRIAL COUNT 25 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_trials_per_block=5,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     dot_period=0.3,
-    squircle_period=0.5,
+    squircle_period=0.3,
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
     dot_difference_limits=[1, 100],  # minimum and maximum dots difference
@@ -156,8 +168,10 @@ welcome_txt = visual.TextStim(win=win, text='Welcome to this experiment!', heigh
 welcome2_txt = visual.TextStim(win=win, text='In this experiment, you will be playing a game with dots!', height=50,
                                pos=[0, 0], color='white')
 
-welcome2_squircles_txt = visual.TextStim(win=win, text='In this experiment, you will be playing a game of comparing colours!', height=50,
-                               pos=[0, 0], color='white')
+welcome2_squircles_txt = visual.TextStim(win=win,
+                                         text='In this experiment, you will be playing a game of comparing colours!',
+                                         height=50,
+                                         pos=[0, 0], color='white')
 
 practice_instructions_txt = visual.TextStim(win=win,
                                             text='During this game, you will see two boxes containing dots briefly '
@@ -172,18 +186,19 @@ practice_instructions_txt = visual.TextStim(win=win,
                                                  'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
 
 practice_instructions_squircles_txt = visual.TextStim(win=win,
-                                            text='During this game, you will see 2 circles of coloured patches that will'
-                                                 ' briefly flash on either side of the centre of the screen (marked '
-                                                 'with a "+" sign). The patches will have colours ranging from red to '
-                                                 'blue. Your task is to decide which of the two circles of coloured '
-                                                 'patches is more red on average, compared to the other one. If you '
-                                                 'think the left circle was more red, you respond with a left '
-                                                 'mouse-click. If you think the right circle was more red , you respond '
-                                                 'with a right mouse-click. The task will start off quite easy but will '
-                                                 'become harder as you progress \n \n Press the "next" button to start '
-                                                 'the game. The first phase of the game can take up to 8 '
-                                                 'minutes. You should reach a stable performance level to continue to the '
-                                                 'next phase.', height=th, pos=[0, 0], wrapWidth=1000, color='white')
+                                                      text='During this game, you will see 2 circles of coloured patches that will'
+                                                           ' briefly flash on either side of the centre of the screen (marked '
+                                                           'with a "+" sign). The patches will have colours ranging from red to '
+                                                           'blue. Your task is to decide which of the two circles of coloured '
+                                                           'patches is more red on average, compared to the other one. If you '
+                                                           'think the left circle was more red, you respond with a left '
+                                                           'mouse-click. If you think the right circle was more red , you respond '
+                                                           'with a right mouse-click. The task will start off quite easy but will '
+                                                           'become harder as you progress \n \n Press the "next" button to start '
+                                                           'the game. The first phase of the game can take up to 8 '
+                                                           'minutes. You should reach a stable performance level to continue to the '
+                                                           'next phase.', height=th, pos=[0, 0], wrapWidth=1000,
+                                                      color='white')
 
 continue_txt = visual.TextStim(win=win, text='Great, you are now ready to continue!', height=60, pos=[0, 0],
                                wrapWidth=1000,
@@ -378,7 +393,7 @@ def generate_colour_samples(colour_mean, colour_sd, n_circles):
 
 # turn colour sample values into RGB values from blue to red
 def generate_rgb_values(value):
-    colour_value = [value*255, 0, (1 - value) * 255]
+    colour_value = [value * 255, 0, (1 - value) * 255]
     return colour_value
 
 
@@ -710,7 +725,6 @@ def do_trial(win, mouse, gv, info):
             rect_right.lineWidth = 6
             slider_cover.pos = (-200, -300)
 
-    send_trigger_fast(triggers['response'], task)  # send response trigger
     decision_rt_2 = clock.getTime()
     info['decision_rt'] = decision_rt_2 - decision_rt_1
     info['participant_response'] = choice
@@ -724,7 +738,6 @@ def do_trial(win, mouse, gv, info):
     rect_right.draw()
     rect_left.draw()
     win.flip()
-    send_trigger_fast(0, task)  # reset trigger to 0
     exit_q()
 
     # STAIRCASING
@@ -778,7 +791,6 @@ def do_trial(win, mouse, gv, info):
 
         info['next_dot_count_low'] = next_dot_count_low
         info['next_dot_count_high'] = next_dot_count_high
-
 
     # CONFIDENCE SLIDER
     if info['confidence_slider_on']:
@@ -995,7 +1007,6 @@ def do_trial(win, mouse, gv, info):
 globalClock = core.Clock()
 mouse = event.Mouse()
 win.mouseVisible = True
-
 
 # RUN EXPERIMENT
 # welcome
