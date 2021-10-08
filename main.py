@@ -9,20 +9,7 @@ import math
 import numpy as np  # whole numpy lib is available, prepend 'np.'
 from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
-
-
-# SET UP EEG TRIGGERS
-from psychopy import parallel
-from triggers import triggers
-
-IOport = parallel.ParallelPort(
-    address='0xC050')  # change the address to whatever it is for the port on the computer you are using
-holdvalue = 0  # reset the port to this after every trigger
-IOport.setData(holdvalue)  # initialise the parallel port at 0 here, if not done then it causes problems for some reason
-
-
-def send_trigger(code):
-    IOport.setData(code)
+import  serial  # serial port for eeg triggering
 
 
 print('Reminder: Press Q to quit.')  # press Q and experiment will quit on next win flip
@@ -31,11 +18,29 @@ print('Reminder: Press Q to quit.')  # press Q and experiment will quit on next 
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
 expInfo = {'participant nr': '', 'session (1/2)': '', 'condition (s/ns)': '', 'task (s/d)': '', 'age': '',
-           'gender (f/m/o)': ''}
+           'gender (f/m/o)': '', 'handedness (l/r/b)': '', 'send triggers': 'True'}  # default is sending triggers; set this to false if you do not want to do this as EEG experiment
 expName = 'Confidence Matching EEG'
 dlg = gui.DlgFromDict(dictionary=expInfo, sortKeys=False, title=expName)
 if not dlg.OK:
     core.quit()  # pressed cancel
+
+# SET UP EEG TRIGGERS
+send_triggers = expInfo['send triggers']
+if send_triggers:
+    from triggers import triggers
+    # triggers are actually sent over a serial port, not parallel port
+    IOport = serial.Serial('COM4', 115200, timeout=0.001)  # port COM4, baudrate = 115200, timeout of 1ms
+    IOport.close()  # check if these two lines are necessary or if its automatically opened !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    IOport.open()
+    
+    def send_trigger(code):
+        """
+        code: expects an integer code (up to a maximum of 127, because of the serial port being weird)to send to the EEG)
+        """
+        IOport.write(str.encode(chr(code)))  # this expected bytes. therefore we need to convert the integers we are using as trigger codes
+        IOport.flush()
+
+
 
 # SET EXPERIMENT VARIABLES
 # variables in gv are just fixed
@@ -709,6 +714,7 @@ def do_trial(win, mouse, gv, info):
         buttons = mouse.getPressed()
         # left click
         if buttons == [1, 0, 0]:
+            send_trigger(2)
             # save participant choice
             choice = "left"
             rect_left.lineColor = (0, 0.8, 0.8)
@@ -716,13 +722,13 @@ def do_trial(win, mouse, gv, info):
             slider_cover.pos = (200, -300)
         # right click
         if buttons == [0, 0, 1]:
+            send_trigger(3)
             # save participant choice
             choice = "right"
             rect_right.lineColor = (0, 0.8, 0.8)
             rect_right.lineWidth = 6
             slider_cover.pos = (-200, -300)
 
-    send_trigger(triggers['response'])
     decision_rt_2 = clock.getTime()
     info['decision_rt'] = decision_rt_2 - decision_rt_1
     info['participant_response'] = choice
@@ -1013,33 +1019,34 @@ button.draw()
 button_txt.draw()
 win.flip()
 exit_q()
-core.wait(1)
+core.wait(0.2)
 while not mouse.isPressedIn(button):
     pass
-if info['task'] == 's':
-    welcome2_squircles_txt.draw()
-else:
-    welcome2_txt.draw()
-button.draw()
-button_txt.draw()
-win.flip()
-exit_q()
-core.wait(1)
-while not mouse.isPressedIn(button):
-    pass
-
-# practice instructions
-if info['task'] == 's':
-    practice_instructions_squircles_txt.draw()
-else:
-    practice_instructions_txt.draw()
-button.draw()
-button_txt.draw()
-win.flip()
-exit_q()
-core.wait(1)
-while not mouse.isPressedIn(button):
-    pass
+# uncomment again !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# if info['task'] == 's':
+#     welcome2_squircles_txt.draw()
+# else:
+#     welcome2_txt.draw()
+# button.draw()
+# button_txt.draw()
+# win.flip()
+# exit_q()
+# core.wait(1)
+# while not mouse.isPressedIn(button):
+#     pass
+#
+# # practice instructions
+# if info['task'] == 's':
+#     practice_instructions_squircles_txt.draw()
+# else:
+#     practice_instructions_txt.draw()
+# button.draw()
+# button_txt.draw()
+# win.flip()
+# exit_q()
+# core.wait(1)
+# while not mouse.isPressedIn(button):
+#     pass
 
 # practice block
 info['staircasing_on'] = True
@@ -1402,6 +1409,10 @@ info['end_date'] = data.getDateStr()
 dataline = ','.join([str(info[v]) for v in log_vars])
 datafile.write(dataline + '\n')
 datafile.flush()
+
+# close port
+if send_triggers:
+    IOport.close()
 
 # thank you
 thanks_txt.draw()
