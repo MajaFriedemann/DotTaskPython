@@ -9,16 +9,15 @@ import math
 import numpy as np  # whole numpy lib is available, prepend 'np.'
 from psychopy import gui, visual, core, data, event, logging, misc, clock
 from psychopy.hardware import keyboard
-import  serial  # serial port for eeg triggering
-
+import serial  # serial port for eeg triggering
 
 print('Reminder: Press Q to quit.')  # press Q and experiment will quit on next win flip
-
 
 # SESSION INFORMATION
 # Pop up asking for participant number, session, age, and gender
 expInfo = {'participant nr': '', 'session (1/2)': '', 'condition (s/ns)': '', 'task (s/d)': '', 'age': '',
-           'gender (f/m/o)': '', 'handedness (l/r/b)': '', 'send triggers': 'True'}  # default is sending triggers; set this to false if you do not want to do this as EEG experiment
+           'gender (f/m/o)': '', 'handedness (l/r/b)': '',
+           'send triggers': 'True'}  # default is sending triggers; set this to false if you do not want to do this as EEG experiment
 expName = 'Confidence Matching EEG'
 dlg = gui.DlgFromDict(dictionary=expInfo, sortKeys=False, title=expName)
 if not dlg.OK:
@@ -28,19 +27,24 @@ if not dlg.OK:
 send_triggers = expInfo['send triggers']
 if send_triggers:
     from triggers import triggers
+
     # triggers are actually sent over a serial port, not parallel port
-    IOport = serial.Serial('COM4', 115200, timeout=0.001)  # port COM4, baudrate = 115200, timeout of 1ms
-    IOport.close()  # check if these two lines are necessary or if its automatically opened !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    IOport = serial.Serial('COM4', 115200, timeout=0.001)  # port COM4, baud rate = 115200, timeout of 1ms
+    IOport.close()
     IOport.open()
-    
+
+
     def send_trigger(code):
         """
         code: expects an integer code (up to a maximum of 127, because of the serial port being weird)to send to the EEG)
         """
-        IOport.write(str.encode(chr(code)))  # this expected bytes. therefore we need to convert the integers we are using as trigger codes
+        IOport.write(str.encode(
+            chr(code)))  # this expects bytes. therefore we need to convert the integers we are using as trigger codes
         IOport.flush()
 
-
+else:
+    def send_trigger(code):
+        pass
 
 # SET EXPERIMENT VARIABLES
 # variables in gv are just fixed
@@ -174,6 +178,26 @@ welcome2_squircles_txt = visual.TextStim(win=win,
                                          text='In this experiment, you will be playing a game of comparing colours!',
                                          height=50,
                                          pos=[0, 0], color='white')
+
+prompt_txt = visual.TextStim(win=win,
+                                         text='Which box contains more dots?',
+                                         height=50,
+                                         pos=[0, 50], color='white')
+
+prompt_below_txt = visual.TextStim(win=win,
+                                         text='(left click for left box, right click for right box)',
+                                         height=30,
+                                         pos=[0, -100], color='white')
+
+prompt_squircles_txt = visual.TextStim(win=win,
+                                         text='Which circle is more red?',
+                                         height=50,
+                                         pos=[0, 50], color='white')
+
+prompt_squircles_below_txt = visual.TextStim(win=win,
+                                         text='(left click for left circle, right click for right circle)',
+                                         height=30,
+                                         pos=[0, -100], color='white')
 
 practice_instructions_txt = visual.TextStim(win=win,
                                             text='During this game, you will see two boxes containing dots briefly '
@@ -648,6 +672,8 @@ def do_trial(win, mouse, gv, info):
             circle.draw()
 
         # show squircles for stimulus period
+        rect_right.draw()
+        rect_left.draw()
         win.flip()
         decision_rt_1 = clock.getTime()
         exit_q()
@@ -702,7 +728,7 @@ def do_trial(win, mouse, gv, info):
     # remove stimulus but keep the rectangles
     rect_right.draw()
     rect_left.draw()
-    choice_txt.draw()
+    # choice_txt.draw()  # leave this out to not have a visual change on screen post stimulus presentation
     win.flip()
     exit_q()
 
@@ -712,22 +738,22 @@ def do_trial(win, mouse, gv, info):
     buttons = mouse.getPressed()
     while buttons == [0, 0, 0]:
         buttons = mouse.getPressed()
-        # left click
-        if buttons == [1, 0, 0]:
-            send_trigger(2)
-            # save participant choice
-            choice = "left"
-            rect_left.lineColor = (0, 0.8, 0.8)
-            rect_left.lineWidth = 6
-            slider_cover.pos = (200, -300)
-        # right click
-        if buttons == [0, 0, 1]:
-            send_trigger(3)
-            # save participant choice
-            choice = "right"
-            rect_right.lineColor = (0, 0.8, 0.8)
-            rect_right.lineWidth = 6
-            slider_cover.pos = (-200, -300)
+    # left click
+    if buttons == [1, 0, 0]:
+        send_trigger(2)
+        # save participant choice
+        choice = "left"
+        rect_left.lineColor = (0, 0.8, 0.8)
+        rect_left.lineWidth = 6
+        slider_cover.pos = (200, -300)
+    # right click
+    if buttons == [0, 0, 1]:
+        send_trigger(3)
+        # save participant choice
+        choice = "right"
+        rect_right.lineColor = (0, 0.8, 0.8)
+        rect_right.lineWidth = 6
+        slider_cover.pos = (-200, -300)
 
     decision_rt_2 = clock.getTime()
     info['decision_rt'] = decision_rt_2 - decision_rt_1
@@ -741,6 +767,7 @@ def do_trial(win, mouse, gv, info):
 
     rect_right.draw()
     rect_left.draw()
+    core.wait(0.8)  # do not have visual changes on screen for 800ms post response
     win.flip()
     exit_q()
 
@@ -813,6 +840,7 @@ def do_trial(win, mouse, gv, info):
         rect_left.draw()
         rect_right.draw()
         confidence_txt.draw()
+        core.wait(0.3)
         win.flip()
         exit_q()
 
@@ -906,7 +934,7 @@ def do_trial(win, mouse, gv, info):
 
             print(partner_confidence)
 
-            core.wait(0.5)
+            core.wait(0.6)
             slider.draw()
             slider_cover.draw()
             rect_left.draw()
@@ -1022,33 +1050,40 @@ exit_q()
 core.wait(0.2)
 while not mouse.isPressedIn(button):
     pass
-# uncomment again !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# if info['task'] == 's':
-#     welcome2_squircles_txt.draw()
-# else:
-#     welcome2_txt.draw()
-# button.draw()
-# button_txt.draw()
-# win.flip()
-# exit_q()
-# core.wait(1)
-# while not mouse.isPressedIn(button):
-#     pass
-#
-# # practice instructions
-# if info['task'] == 's':
-#     practice_instructions_squircles_txt.draw()
-# else:
-#     practice_instructions_txt.draw()
-# button.draw()
-# button_txt.draw()
-# win.flip()
-# exit_q()
-# core.wait(1)
-# while not mouse.isPressedIn(button):
-#     pass
+if info['task'] == 's':
+    welcome2_squircles_txt.draw()
+else:
+    welcome2_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
+
+# practice instructions
+if info['task'] == 's':
+    practice_instructions_squircles_txt.draw()
+else:
+    practice_instructions_txt.draw()
+button.draw()
+button_txt.draw()
+win.flip()
+exit_q()
+core.wait(1)
+while not mouse.isPressedIn(button):
+    pass
 
 # practice block
+if info['task'] == 's':
+    prompt_squircles_txt.draw()
+    prompt_squircles_below_txt.draw()
+else:
+    prompt_txt.draw()
+    prompt_below_txt.draw()
+win.flip()
+core.wait(3)
 info['staircasing_on'] = True
 info['confidence_slider_on'] = False
 info['partner'] = None
@@ -1084,6 +1119,14 @@ while not mouse.isPressedIn(button):
     pass
 
 # confidence slider practice block
+if info['task'] == 's':
+    prompt_squircles_txt.draw()
+    prompt_squircles_below_txt.draw()
+else:
+    prompt_txt.draw()
+    prompt_below_txt.draw()
+win.flip()
+core.wait(3)
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 info['partner'] = None
@@ -1147,6 +1190,14 @@ overall_score = 0
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 for block in range(gv['n_blocks_per_partner']):
+    if info['task'] == 's':
+        prompt_squircles_txt.draw()
+        prompt_squircles_below_txt.draw()
+    else:
+        prompt_txt.draw()
+        prompt_below_txt.draw()
+    win.flip()
+    core.wait(3)
     info['block_with_partner'] = block + 1
     info['block_count'] = int(info['block_count']) + 1
 
@@ -1285,6 +1336,14 @@ while not mouse.isPressedIn(button):
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
 for block in range(gv['n_blocks_per_partner']):
+    if info['task'] == 's':
+        prompt_squircles_txt.draw()
+        prompt_squircles_below_txt.draw()
+    else:
+        prompt_txt.draw()
+        prompt_below_txt.draw()
+    win.flip()
+    core.wait(3)
     info['block_with_partner'] = block + 1
     info['block_count'] = int(info['block_count']) + 1
 
