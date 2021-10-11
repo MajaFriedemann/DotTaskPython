@@ -24,9 +24,24 @@ if not dlg.OK:
     core.quit()  # pressed cancel
 
 # SET UP EEG TRIGGERS
+triggers = dict(
+    exp_start=1,
+    block_start=2,
+    fixation_cross=3,
+    stimulus_left_correct=4,
+    stimulus_right_correct=5,
+    response_left=6,
+    response_right=7,
+    confidence_rating=8,
+    partner_marker=9,
+    higher_conf_box=10,
+    feedback_correct=11,
+    feedback_incorrect=12,
+    exp_end=13
+)
+
 send_triggers = expInfo['send triggers']
 if send_triggers:
-    from triggers import triggers
 
     # triggers are actually sent over a serial port, not parallel port
     IOport = serial.Serial('COM4', 115200, timeout=0.001)  # port COM4, baud rate = 115200, timeout of 1ms
@@ -44,7 +59,7 @@ if send_triggers:
 
 else:
     def send_trigger(code):
-        pass
+        print('sending trigger: ' + code)
 
 # SET EXPERIMENT VARIABLES
 # variables in gv are just used to structure the task
@@ -58,18 +73,23 @@ gv = dict(
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
 
-    staircase_breaks=[5, 10],  # number of trials after which staircasing values change (takes only two values at the moment)
-    staircase_step_sizes=[0.4, 0.2, 0.1],  # staircase step sizes in log space (takes only 3 values at the moment in accordance with the 2 staircase_breaks values)
-    next_stair_value=initial_stair_value,  # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
+    staircase_breaks=[5, 10],
+    # number of trials after which staircasing values change (takes only two values at the moment)
+    staircase_step_sizes=[0.4, 0.2, 0.1],
+    # staircase step sizes in log space (takes only 3 values at the moment in accordance with the 2 staircase_breaks values)
+    next_stair_value=initial_stair_value,
+    # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
     stair_values_list=[initial_stair_value],
 
     dot_difference_limits=[1, 100],  # minimum and maximum dots difference
     next_dot_count_low=200,  # fixed low dot count
-    next_dot_count_high=200 + int(round((math.e ** initial_stair_value), 0)),  # initial high dot count based on initial stair value
+    next_dot_count_high=200 + int(round((math.e ** initial_stair_value), 0)),
+    # initial high dot count based on initial stair value
 
     squircles_n_circles=8,  # number of circles for the squircles stimuli
     squircles_color_sd=0.1,  # colour variance for the squircles stimuli
-    next_squircle_difference=int(round((math.e ** initial_stair_value), 0)) / 1000,  # initial squircle colour difference
+    next_squircle_difference=int(round((math.e ** initial_stair_value), 0)) / 1000,
+    # initial squircle colour difference
     previous_trial_correct=False
 )
 
@@ -179,24 +199,24 @@ welcome2_squircles_txt = visual.TextStim(win=win,
                                          pos=[0, 0], color='white')
 
 prompt_txt = visual.TextStim(win=win,
-                                         text='Which box contains more dots?',
-                                         height=50,
-                                         pos=[0, 50], color='white')
+                             text='Which box contains more dots?',
+                             height=50,
+                             pos=[0, 50], color='white')
 
 prompt_below_txt = visual.TextStim(win=win,
-                                         text='(left click for left box, right click for right box)',
-                                         height=30,
-                                         pos=[0, -100], color='white')
+                                   text='(left click for left box, right click for right box)',
+                                   height=30,
+                                   pos=[0, -100], color='white')
 
 prompt_squircles_txt = visual.TextStim(win=win,
-                                         text='Which circle is more red?',
-                                         height=50,
-                                         pos=[0, 50], color='white')
+                                       text='Which circle is more red?',
+                                       height=50,
+                                       pos=[0, 50], color='white')
 
 prompt_squircles_below_txt = visual.TextStim(win=win,
-                                         text='(left click for left circle, right click for right circle)',
-                                         height=30,
-                                         pos=[0, -100], color='white')
+                                             text='(left click for left circle, right click for right circle)',
+                                             height=30,
+                                             pos=[0, -100], color='white')
 
 practice_instructions_txt = visual.TextStim(win=win,
                                             text='During this game, you will see two boxes containing dots briefly '
@@ -517,7 +537,7 @@ def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='
 
 
 # DRAW DOTS FUNCTION
-def do_trial(win, mouse, gv, info):
+def do_trial(win, mouse, gv, info, triggers):
     # CLOCK
     trial_clock = core.Clock()
 
@@ -604,8 +624,10 @@ def do_trial(win, mouse, gv, info):
     win.mouseVisible = False
 
     # DRAW THE FIXATION CROSS
+    trig = triggers['fixation_cross']
     fixation.draw()
     win.flip()
+    send_trigger(trig)
     exit_q()
     core.wait(gv['fixation_period'])
 
@@ -629,11 +651,13 @@ def do_trial(win, mouse, gv, info):
         info['squircle_value_high'] = colour_mean_high
 
         if correct_response == "left":
+            trig = triggers['stimulus_left_correct']
             left_squircle_colours = generate_colour_samples(colour_mean_high, gv['squircles_color_sd'], gv[
                 'squircles_n_circles'])  # one number for each circle with defined mean and sd for the numbers
             right_squircle_colours = generate_colour_samples(colour_mean_low, float(gv['squircles_color_sd']),
                                                              int(gv['squircles_n_circles']))
         else:
+            trig = triggers['stimulus_right_correct']
             left_squircle_colours = generate_colour_samples(colour_mean_low, gv['squircles_color_sd'],
                                                             gv['squircles_n_circles'])
             right_squircle_colours = generate_colour_samples(colour_mean_high, gv['squircles_color_sd'],
@@ -673,12 +697,6 @@ def do_trial(win, mouse, gv, info):
             circle.fillColor = (fill_colour[0], fill_colour[1], fill_colour[2])
             circle.draw()
 
-        # show squircles for stimulus period
-        rect_right.draw()
-        rect_left.draw()
-        win.flip()
-        trial_clock.reset()  # set clock to 0 at stimulus presentation
-        exit_q()
 
 
     # DOTS TASK
@@ -687,9 +705,11 @@ def do_trial(win, mouse, gv, info):
         dot_count_high = gv['next_dot_count_high']
         dot_count_low = gv['next_dot_count_low']
         if correct_response == "left":
+            trig = triggers['stimulus_left_correct']
             dots_matrix_left = dots_matrix([20, 20], dot_count_high)
             dots_matrix_right = dots_matrix([20, 20], dot_count_low)
         else:
+            trig = triggers['stimulus_right_correct']
             dots_matrix_right = dots_matrix([20, 20], dot_count_high)
             dots_matrix_left = dots_matrix([20, 20], dot_count_low)
 
@@ -718,13 +738,13 @@ def do_trial(win, mouse, gv, info):
                         stimulus.draw()
             row_count = row_count + 1
 
-        # show dots for stimulus period
-        rect_right.draw()
-        rect_left.draw()
-        win.flip()
-        trial_clock.reset()  # set clock to 0 at stimulus presentation
-        exit_q()
-
+    # show stimulus for stimulus period
+    rect_right.draw()
+    rect_left.draw()
+    win.flip()
+    send_trigger(trig)
+    trial_clock.reset()  # set clock to 0 at stimulus presentation
+    exit_q()
     core.wait(gv['stimulus_period'])
 
     # remove stimulus but keep the rectangles
@@ -742,7 +762,8 @@ def do_trial(win, mouse, gv, info):
         buttons = mouse.getPressed()
         # left click
     if buttons == [1, 0, 0]:
-        send_trigger(2)
+        trig = triggers ['response_left']
+        send_trigger(trig)
         # save participant choice
         choice = "left"
         rect_left.lineColor = (0, 0.8, 0.8)
@@ -750,7 +771,8 @@ def do_trial(win, mouse, gv, info):
         slider_cover.pos = (200, -300)
     # right click
     if buttons == [0, 0, 1]:
-        send_trigger(3)
+        trig = triggers['response_right']
+        send_trigger(trig)
         # save participant choice
         choice = "right"
         rect_right.lineColor = (0, 0.8, 0.8)
@@ -810,8 +832,8 @@ def do_trial(win, mouse, gv, info):
 
     else:
         min_stair_value = min(gv['stair_values_list'])
-        stair_value = round((gv['next_stair_value'] + min_stair_value) / 2, 2)  # final stair value is the average of the last stair value and the lowest stair value that the participant reached in the practice phase (this is in case participants just start slacking in the end and perform worse than they could)
-
+        stair_value = round((gv['next_stair_value'] + min_stair_value) / 2,
+                            2)  # final stair value is the average of the last stair value and the lowest stair value that the participant reached in the practice phase (this is in case participants just start slacking in the end and perform worse than they could)
 
     # SQUIRCLES TASK
     if info['task'] == 's':
@@ -855,6 +877,7 @@ def do_trial(win, mouse, gv, info):
         # ANIMATE THE CONFIDENCE SLIDER MARKER
         slider_rating_txt = visual.TextStim(win=win, text='%', height=18,
                                             pos=(0, 0), color='white')
+        trig = triggers['confidence_rating']
         while not slider.rating:
             # restrict slider marker to the range of slider
             if mouse.getPos()[0] > (slider.size[0] / 2):
@@ -891,12 +914,14 @@ def do_trial(win, mouse, gv, info):
             win.flip()
             exit_q()
 
+        send_trigger(trig)
         info['confidence_rt'] = trial_clock.getTime()
         info['participant_confidence'] = participant_confidence
         print(participant_confidence)
 
         # PARTNER CHOICE AND CONFIDENCE RATING
         if info['partner'] is not None:
+            trig = triggers['partner_marker']
             info['trial_score'] = reverse_brier_score(participant_confidence, participant_correct)
             partner_confidence = 999
             while partner_confidence > 100 or partner_confidence < 50:
@@ -952,11 +977,13 @@ def do_trial(win, mouse, gv, info):
             slider_rating_txt.draw()
             partner_marker.draw()
             win.flip()
+            send_trigger(trig)
             exit_q()
             core.wait(1)  # give participant time to see the partner marker
 
             # STRATEGIC CONDITION
             if info['condition'] == 's':
+                trig = triggers['higher_conf_box']
                 # highlight higher confidence decision
                 if partner_confidence > participant_confidence:  # partner's decision is chosen
                     higher_conf_box.pos = (partner_marker_position, slider.pos[1])
@@ -979,16 +1006,19 @@ def do_trial(win, mouse, gv, info):
                 partner_marker.draw()
                 higher_conf_box.draw()
                 win.flip()
+                send_trigger(trig)
                 exit_q()
                 core.wait(1)
 
                 # give feedback on joint decision
                 if info['joint_correct']:
+                    trig = triggers['feedback_correct']
                     info['trial_score'] = 1
                     higher_conf_box.lineColor = 'lawngreen'
                     feedback_txt = visual.TextStim(win=win, text='JOINT DECISION: CORRECT', height=35, pos=[0, -90],
                                                    color='lawngreen')
                 else:
+                    trig = triggers['feedback_incorrect']
                     info['trial_score'] = 0
                     higher_conf_box.lineColor = 'red'
                     feedback_txt = visual.TextStim(win=win, text='JOINT DECISION: INCORRECT', height=35, pos=[0, -90],
@@ -1003,6 +1033,7 @@ def do_trial(win, mouse, gv, info):
                 higher_conf_box.draw()
                 feedback_txt.draw()
                 win.flip()
+                send_trigger(trig)
                 exit_q()
                 core.wait(1)
 
@@ -1012,10 +1043,12 @@ def do_trial(win, mouse, gv, info):
             higher_conf_box.pos = (slider_marker.pos[0], slider.pos[1])
             if info['condition'] == 's':
                 if info['participant_correct']:
+                    trig = triggers['feedback_correct']
                     higher_conf_box.lineColor = 'lawngreen'
                     feedback_txt = visual.TextStim(win=win, text='CORRECT', height=35, pos=[0, -90],
                                                    color='lawngreen')
                 else:
+                    trig = triggers['feedback_incorrect']
                     higher_conf_box.lineColor = 'red'
                     feedback_txt = visual.TextStim(win=win, text='INCORRECT', height=35, pos=[0, -90],
                                                    color='red')
@@ -1029,6 +1062,7 @@ def do_trial(win, mouse, gv, info):
                 feedback_txt.draw()
                 core.wait(0.5)
                 win.flip()
+                send_trigger(trig)
                 exit_q()
                 core.wait(1)
 
@@ -1048,6 +1082,7 @@ def do_trial(win, mouse, gv, info):
 # globalClock = core.Clock()
 mouse = event.Mouse()
 win.mouseVisible = True
+trig = triggers['exp_start']
 
 # RUN EXPERIMENT
 # welcome
@@ -1055,6 +1090,7 @@ welcome_txt.draw()
 button.draw()
 button_txt.draw()
 win.flip()
+send_trigger(trig)
 exit_q()
 core.wait(0.2)
 while not mouse.isPressedIn(button):
@@ -1085,6 +1121,7 @@ while not mouse.isPressedIn(button):
     pass
 
 # practice block
+trig = triggers['block_start']
 if info['task'] == 's':
     prompt_squircles_txt.draw()
     prompt_squircles_below_txt.draw()
@@ -1092,6 +1129,7 @@ else:
     prompt_txt.draw()
     prompt_below_txt.draw()
 win.flip()
+send_trigger(trig)
 core.wait(3)
 info['staircasing_on'] = True
 info['confidence_slider_on'] = False
@@ -1100,7 +1138,7 @@ info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_practice_trials']):
     info['trial_in_block'] = trial + 1
     info['trial_count'] = int(info['trial_count']) + 1
-    info = do_trial(win, mouse, gv, info)
+    info = do_trial(win, mouse, gv, info, triggers)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
     datafile.flush()
@@ -1128,6 +1166,7 @@ while not mouse.isPressedIn(button):
     pass
 
 # confidence slider practice block
+trig = triggers['block_start']
 if info['task'] == 's':
     prompt_squircles_txt.draw()
     prompt_squircles_below_txt.draw()
@@ -1135,6 +1174,7 @@ else:
     prompt_txt.draw()
     prompt_below_txt.draw()
 win.flip()
+send_trigger(trig)
 core.wait(3)
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
@@ -1143,7 +1183,7 @@ info['block_count'] = int(info['block_count']) + 1
 for trial in range(gv['n_confidence_practice_trials']):
     info['trial_in_block'] = trial + 1
     info['trial_count'] = int(info['trial_count']) + 1
-    info = do_trial(win, mouse, gv, info)
+    info = do_trial(win, mouse, gv, info, triggers)
     dataline = ','.join([str(info[v]) for v in log_vars])
     datafile.write(dataline + '\n')
     datafile.flush()
@@ -1198,6 +1238,7 @@ while not mouse.isPressedIn(button):
 overall_score = 0
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
+trig = triggers['block_start']
 for block in range(gv['n_blocks_per_partner']):
     if info['task'] == 's':
         prompt_squircles_txt.draw()
@@ -1206,6 +1247,7 @@ for block in range(gv['n_blocks_per_partner']):
         prompt_txt.draw()
         prompt_below_txt.draw()
     win.flip()
+    send_trigger(trig)
     core.wait(3)
     info['block_with_partner'] = block + 1
     info['block_count'] = int(info['block_count']) + 1
@@ -1219,7 +1261,7 @@ for block in range(gv['n_blocks_per_partner']):
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
         info['trial_count'] = int(info['trial_count']) + 1
-        info = do_trial(win, mouse, gv, info)
+        info = do_trial(win, mouse, gv, info, triggers)
         trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
@@ -1344,6 +1386,7 @@ while not mouse.isPressedIn(button):
 # second partner
 info['staircasing_on'] = False
 info['confidence_slider_on'] = True
+trig = triggers['block_start']
 for block in range(gv['n_blocks_per_partner']):
     if info['task'] == 's':
         prompt_squircles_txt.draw()
@@ -1352,6 +1395,7 @@ for block in range(gv['n_blocks_per_partner']):
         prompt_txt.draw()
         prompt_below_txt.draw()
     win.flip()
+    send_trigger(trig)
     core.wait(3)
     info['block_with_partner'] = block + 1
     info['block_count'] = int(info['block_count']) + 1
@@ -1365,7 +1409,7 @@ for block in range(gv['n_blocks_per_partner']):
     for trial in range(gv['n_trials_per_block']):
         info['trial_in_block'] = trial + 1
         info['trial_count'] = int(info['trial_count']) + 1
-        info = do_trial(win, mouse, gv, info)
+        info = do_trial(win, mouse, gv, info, triggers)
         trial_score = trial_score = float(info['trial_score'])
         overall_score += trial_score
         dataline = ','.join([str(info[v]) for v in log_vars])
@@ -1479,6 +1523,8 @@ datafile.write(dataline + '\n')
 datafile.flush()
 
 # close port
+trig = triggers['exp_end']
+send_trigger(trig)
 if send_triggers:
     IOport.close()
 
