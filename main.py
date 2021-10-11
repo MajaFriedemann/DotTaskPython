@@ -59,7 +59,7 @@ if send_triggers:
 
 else:
     def send_trigger(code):
-        print('sending trigger: ' + code)
+        print('sending trigger: ' + str(code))
 
 # SET EXPERIMENT VARIABLES
 # variables in gv are just used to structure the task
