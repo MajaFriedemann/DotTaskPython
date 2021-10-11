@@ -47,23 +47,30 @@ else:
         pass
 
 # SET EXPERIMENT VARIABLES
-# variables in gv are just fixed
+# variables in gv are just used to structure the task
+initial_stair_value = 4.2
 gv = dict(
-    n_practice_trials=5,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_practice_trials=20,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
     n_trials_per_block=5,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    dot_period=0.3,
-    squircle_period=0.3,
+    stimulus_period=0.3,
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
+
+    staircase_breaks=[5, 10],  # number of trials after which staircasing values change (takes only two values at the moment)
+    staircase_step_sizes=[0.4, 0.2, 0.1],  # staircase step sizes in log space (takes only 3 values at the moment in accordance with the 2 staircase_breaks values)
+    next_stair_value=initial_stair_value,  # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
+    stair_values_list=[initial_stair_value],
+
     dot_difference_limits=[1, 100],  # minimum and maximum dots difference
+    next_dot_count_low=200,  # fixed low dot count
+    next_dot_count_high=200 + int(round((math.e ** initial_stair_value), 0)),  # initial high dot count based on initial stair value
+
     squircles_n_circles=8,  # number of circles for the squircles stimuli
     squircles_color_sd=0.1,  # colour variance for the squircles stimuli
-    staircase_breaks=[5, 10],
-    # number of trials after which staircasing values change (takes only two values at the moment)
-    staircase_step_sizes=[0.4, 0.2, 0.1],
-    # staircase step sizes in log space (takes only 3 values at the moment in accordance with the 2 staircase_breaks values)  
+    next_squircle_difference=int(round((math.e ** initial_stair_value), 0)) / 1000,  # initial squircle colour difference
+    previous_trial_correct=False
 )
 
 # variables in info will be saved as participant data
@@ -118,15 +125,7 @@ info = dict(
     p2_likeability=None,
     p2_confidence=None,
     p2_accuracy=None,
-    p2_team_work=None,
-
-    # variables for staircasing
-    next_dot_count_low=200,  # fixed low dot count
-    next_stair_value=4.2,
-    # initial staircasing value is 4.2 (as in Rouault, M., Seow, T. Gillan, C. M., & Fleming, S. M. (2018))
-    next_dot_count_high=200 + int(round((math.e ** 4.2), 0)),  # initial high dot count based on initial stair value
-    next_squircle_difference=0.25,  # initial squircle colour difference
-    previous_trial_correct=False
+    p2_team_work=None
 )
 
 # LOGGING
@@ -519,6 +518,9 @@ def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='
 
 # DRAW DOTS FUNCTION
 def do_trial(win, mouse, gv, info):
+    # CLOCK
+    trial_clock = core.Clock()
+
     # STIMULI
     fixation = visual.ShapeStim(
         win,
@@ -616,7 +618,7 @@ def do_trial(win, mouse, gv, info):
     if info['task'] == 's':
         choice_txt.text = 'Which circle was more red?'
         # CREATE AND DRAW THE SQUIRCLE STIMULI
-        difference = info['next_squircle_difference']
+        difference = gv['next_squircle_difference']
 
         # determine squircle parameters
         colour_mean_low = round(random.uniform(0, (0.9 - difference)),
@@ -675,16 +677,15 @@ def do_trial(win, mouse, gv, info):
         rect_right.draw()
         rect_left.draw()
         win.flip()
-        decision_rt_1 = clock.getTime()
+        trial_clock.reset()  # set clock to 0 at stimulus presentation
         exit_q()
-        core.wait(gv['squircle_period'])
 
 
     # DOTS TASK
     else:
         # CREATE AND DRAW THE DOTS GRID
-        dot_count_high = info['next_dot_count_high']
-        dot_count_low = info['next_dot_count_low']
+        dot_count_high = gv['next_dot_count_high']
+        dot_count_low = gv['next_dot_count_low']
         if correct_response == "left":
             dots_matrix_left = dots_matrix([20, 20], dot_count_high)
             dots_matrix_right = dots_matrix([20, 20], dot_count_low)
@@ -721,9 +722,10 @@ def do_trial(win, mouse, gv, info):
         rect_right.draw()
         rect_left.draw()
         win.flip()
-        decision_rt_1 = clock.getTime()
+        trial_clock.reset()  # set clock to 0 at stimulus presentation
         exit_q()
-        core.wait(gv['dot_period'])
+
+    core.wait(gv['stimulus_period'])
 
     # remove stimulus but keep the rectangles
     rect_right.draw()
@@ -738,7 +740,7 @@ def do_trial(win, mouse, gv, info):
     buttons = mouse.getPressed()
     while buttons == [0, 0, 0]:
         buttons = mouse.getPressed()
-    # left click
+        # left click
     if buttons == [1, 0, 0]:
         send_trigger(2)
         # save participant choice
@@ -755,8 +757,7 @@ def do_trial(win, mouse, gv, info):
         rect_right.lineWidth = 6
         slider_cover.pos = (-200, -300)
 
-    decision_rt_2 = clock.getTime()
-    info['decision_rt'] = decision_rt_2 - decision_rt_1
+    info['decision_rt'] = trial_clock.getTime()
     info['participant_response'] = choice
 
     if choice == correct_response:
@@ -773,7 +774,7 @@ def do_trial(win, mouse, gv, info):
 
     # STAIRCASING
     # two-down one-up staircase procedure with equal step-sizes for steps up and down
-    stair_value = info['next_stair_value']
+    stair_value = gv['next_stair_value']
     info['stair_value'] = stair_value
 
     if info['staircasing_on']:
@@ -789,7 +790,7 @@ def do_trial(win, mouse, gv, info):
                 stair_value = stair_value + gv['staircase_step_sizes'][
                     2]  # changing by + 0.1 in log space for the rest of the task
 
-        elif participant_correct & info['previous_trial_correct']:  # correct two times in a row, make it harder
+        elif participant_correct & gv['previous_trial_correct']:  # correct two times in a row, make it harder
             if info['trial_in_block'] <= gv['staircase_breaks'][0]:
                 stair_value = stair_value - gv['staircase_step_sizes'][
                     0]  # changing by - 0.4 in log space for the first 5 trials
@@ -803,12 +804,18 @@ def do_trial(win, mouse, gv, info):
         else:  # correct only once in a row, keep it the same
             stair_value = stair_value
 
-    info['next_stair_value'] = stair_value
-    info['previous_trial_correct'] = participant_correct  # only update this variable after we have used it!
+        gv['stair_values_list'].append(stair_value)
+        gv['next_stair_value'] = stair_value
+        gv['previous_trial_correct'] = participant_correct  # only update this variable after we have used it!
+
+    else:
+        min_stair_value = min(gv['stair_values_list'])
+        stair_value = round((gv['next_stair_value'] + min_stair_value) / 2, 2)  # final stair value is the average of the last stair value and the lowest stair value that the participant reached in the practice phase (this is in case participants just start slacking in the end and perform worse than they could)
+
 
     # SQUIRCLES TASK
     if info['task'] == 's':
-        info['next_squircle_difference'] = int(round((math.e ** stair_value), 0)) / 1000
+        gv['next_squircle_difference'] = int(round((math.e ** stair_value), 0)) / 1000
 
     # DOTS TASK
     else:
@@ -820,8 +827,8 @@ def do_trial(win, mouse, gv, info):
         elif next_dot_count_high > (next_dot_count_low + gv['dot_difference_limits'][1]):
             next_dot_count_high = next_dot_count_low + gv['dot_difference_limits'][1]
 
-        info['next_dot_count_low'] = next_dot_count_low
-        info['next_dot_count_high'] = next_dot_count_high
+        gv['next_dot_count_low'] = next_dot_count_low
+        gv['next_dot_count_high'] = next_dot_count_high
 
     # CONFIDENCE SLIDER
     if info['confidence_slider_on']:
@@ -842,6 +849,7 @@ def do_trial(win, mouse, gv, info):
         confidence_txt.draw()
         core.wait(0.3)
         win.flip()
+        trial_clock.reset()  # reset the trial clock to measure time until confidence rating
         exit_q()
 
         # ANIMATE THE CONFIDENCE SLIDER MARKER
@@ -883,6 +891,7 @@ def do_trial(win, mouse, gv, info):
             win.flip()
             exit_q()
 
+        info['confidence_rt'] = trial_clock.getTime()
         info['participant_confidence'] = participant_confidence
         print(participant_confidence)
 
@@ -944,7 +953,7 @@ def do_trial(win, mouse, gv, info):
             partner_marker.draw()
             win.flip()
             exit_q()
-            core.wait(1)
+            core.wait(1)  # give participant time to see the partner marker
 
             # STRATEGIC CONDITION
             if info['condition'] == 's':
@@ -1036,7 +1045,7 @@ def do_trial(win, mouse, gv, info):
 
 
 # INITIALIZE CLOCK & MOUSE
-globalClock = core.Clock()
+# globalClock = core.Clock()
 mouse = event.Mouse()
 win.mouseVisible = True
 
