@@ -47,8 +47,6 @@ if send_triggers:
 
     # triggers are actually sent over a serial port, not parallel port
     IOport = serial.Serial('COM4', 115200, timeout=0.001)  # port COM4, baud rate = 115200, timeout of 1ms
-    IOport.close()
-    IOport.open()
 
 
     def send_trigger(code):
@@ -67,10 +65,10 @@ else:
 # variables in gv are just used to structure the task
 initial_stair_value = 4.2
 gv = dict(
-    n_practice_trials=10,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_practice_trials=100,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
-    n_trials_per_block=5,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_trials_per_block=30,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     stimulus_period=0.3,
     fixation_period=1,
     wait_period=0.5,  # wait time after response before next fixation cross
@@ -526,7 +524,7 @@ def load_partner():
 # questionnaire items
 def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='\n10\n very much'):
     rating = visual.RatingScale(win=win, pos=(0, -100), low=1, high=10, stretch=1.4,
-                                marker='circle', markerColor=(245, 222, 179), showAccept=False, singleClick=True,
+                                marker='circle', markerColor=(0.92, 0.74, 0.40), showAccept=False, singleClick=True,
                                 tickMarks=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                                 labels=[tick1, '2', '3', '4', '5', '6', '7', '8', '9', tick10])
     item = visual.TextStim(win, text=item_text, pos=(0, 150), height=th + 10, color='white')
