@@ -32,12 +32,14 @@ triggers = dict(
     stimulus_right_correct=5,
     response_left=6,
     response_right=7,
-    confidence_rating=8,
-    partner_marker=9,
-    higher_conf_box=10,
-    feedback_correct=11,
-    feedback_incorrect=12,
-    exp_end=13
+    highlight_box=8,
+    confidence_rating=9,
+    partner_marker_left=10,
+    partner_marker_right=11,
+    higher_conf_box=12,
+    feedback_correct=13,
+    feedback_incorrect=14,
+    exp_end=15
 )
 
 send_triggers = expInfo['send triggers']
@@ -65,7 +67,7 @@ else:
 # variables in gv are just used to structure the task
 initial_stair_value = 4.2
 gv = dict(
-    n_practice_trials=20,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_practice_trials=10,  # MAKE TRIAL COUNT 100 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     n_confidence_practice_trials=5,  # make trial count 5 here
     n_blocks_per_partner=5,  # make block count 5 here
     n_trials_per_block=5,  # MAKE TRIAL COUNT 30 HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -164,7 +166,7 @@ datafile.flush()
 # SET UP WINDOW
 win = visual.Window(
     gammaErrorPolicy='ignore',
-    fullscr=True, screen=1,  # PROBABLY MAKE SCREEN = 1 HERE
+    fullscr=True, screen=0,
     allowGUI=True, allowStencil=False,
     monitor='testMonitor', color='black',
     blendMode='avg', useFBO=True, units='pix')  # pix is ca 1200 by 1000
@@ -237,7 +239,7 @@ practice_instructions_squircles_txt = visual.TextStim(win=win,
                                                            'blue. Your task is to decide which of the two circles of coloured '
                                                            'patches is more red on average, compared to the other one. If you '
                                                            'think the left circle was more red, you respond with a left '
-                                                           'mouse-click. If you think the right circle was more red , you respond '
+                                                           'mouse-click. If you think the right circle was more red, you respond '
                                                            'with a right mouse-click. The task will start off quite easy but will '
                                                            'become harder as you progress \n \n Press the "next" button to start '
                                                            'the game. The first phase of the game can take up to 8 '
@@ -320,7 +322,7 @@ partner2_observe_instructions_txt = visual.TextStim(win=win,
                                                          'of those trials were correct. The closer your confidence '
                                                          'judgements align with your actual accuracy, the higher your '
                                                          'cash bonus (up to £5) will be at the end of the experiment. '
-                                                         '\n \nPress the "next" button to do %i more blocks of the dot task.'
+                                                         '\n \nPress the "next" button to do %i more blocks of the game.'
                                                          % (gv['n_blocks_per_partner']), height=th, pos=[0, 0],
                                                     wrapWidth=1000, color='white')
 
@@ -357,7 +359,7 @@ partner2_strategic_instructions_txt = visual.TextStim(win=win,
                                                            'you got it right, report high confidence such that your decision '
                                                            'counts. However, if you are not very sure, it might be best to '
                                                            'report low confidence and thus let your partner\'s decision be chosen. '
-                                                           '\n \nPress the "next" button to do %i more blocks of the dot task.'
+                                                           '\n \nPress the "next" button to do %i more blocks of the game.'
                                                            % (gv['n_blocks_per_partner']), height=th, pos=[0, 0],
                                                       wrapWidth=1000, color='white')
 
@@ -451,6 +453,8 @@ def exit_q(key_list=None):
     res = len(keys) > 0
     if res:
         if 'q' in keys:
+            trig = triggers['exp_end']
+            send_trigger(trig)
             win.close()
             core.quit()
     return res
@@ -522,7 +526,7 @@ def load_partner():
 # questionnaire items
 def questionnaire_item(item_text='item text', tick1='\n1\n not at all', tick10='\n10\n very much'):
     rating = visual.RatingScale(win=win, pos=(0, -100), low=1, high=10, stretch=1.4,
-                                marker='circle', markerColor=(0, 0.8, 0.8), showAccept=False, singleClick=True,
+                                marker='circle', markerColor=(245, 222, 179), showAccept=False, singleClick=True,
                                 tickMarks=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                                 labels=[tick1, '2', '3', '4', '5', '6', '7', '8', '9', tick10])
     item = visual.TextStim(win, text=item_text, pos=(0, 150), height=th + 10, color='white')
@@ -566,8 +570,9 @@ def do_trial(win, mouse, gv, info, triggers):
         width=20 * 12,
         height=20 * 12,
         pos=(210, 105),  # check which variables should correspond to the correct position
+        colorSpace='rgb255',
         fillColor=None,
-        lineColor="white"
+        lineColor=(255, 255, 255)
     )
 
     rect_left = visual.Rect(
@@ -576,8 +581,9 @@ def do_trial(win, mouse, gv, info, triggers):
         width=20 * 12,
         height=20 * 12,
         pos=(-210, 105),  # check which variables should correspond to the correct position
+        colorSpace='rgb255',
         fillColor=None,
-        lineColor="white"
+        lineColor=(255, 255, 255)
     )
 
     slider_marker = visual.ShapeStim(
@@ -586,7 +592,8 @@ def do_trial(win, mouse, gv, info, triggers):
         lineWidth=8,
         pos=(0, 0),
         closeShape=False,
-        lineColor=(0, 0.8, 0.8),
+        colorSpace='rgb255',
+        lineColor=(245, 222, 179),
     )
 
     partner_marker = visual.ShapeStim(
@@ -766,7 +773,7 @@ def do_trial(win, mouse, gv, info, triggers):
         send_trigger(trig)
         # save participant choice
         choice = "left"
-        rect_left.lineColor = (0, 0.8, 0.8)
+        rect_left.lineColor = (245, 222, 179)
         rect_left.lineWidth = 6
         slider_cover.pos = (200, -300)
     # right click
@@ -775,7 +782,7 @@ def do_trial(win, mouse, gv, info, triggers):
         send_trigger(trig)
         # save participant choice
         choice = "right"
-        rect_right.lineColor = (0, 0.8, 0.8)
+        rect_right.lineColor = (245, 222, 179)
         rect_right.lineWidth = 6
         slider_cover.pos = (-200, -300)
 
@@ -791,7 +798,9 @@ def do_trial(win, mouse, gv, info, triggers):
     rect_right.draw()
     rect_left.draw()
     core.wait(0.8)  # do not have visual changes on screen for 800ms post response
+    trig = triggers['highlight_box']
     win.flip()
+    send_trigger(trig)
     exit_q()
 
     # STAIRCASING
@@ -921,7 +930,6 @@ def do_trial(win, mouse, gv, info, triggers):
 
         # PARTNER CHOICE AND CONFIDENCE RATING
         if info['partner'] is not None:
-            trig = triggers['partner_marker']
             info['trial_score'] = reverse_brier_score(participant_confidence, participant_correct)
             partner_confidence = 999
             while partner_confidence > 100 or partner_confidence < 50:
@@ -958,8 +966,10 @@ def do_trial(win, mouse, gv, info, triggers):
 
             if partner_choice == 'right':
                 partner_marker_position = -slider.size[0] / 2 + partner_confidence / 100 * slider.size[0]
+                trig = triggers['partner_marker_right']
             else:
                 partner_marker_position = slider.size[0] / 2 - partner_confidence / 100 * slider.size[0]
+                trig = triggers['partner_marker_left']
 
             partner_marker.pos = (partner_marker_position, slider.pos[1])
 
@@ -993,7 +1003,7 @@ def do_trial(win, mouse, gv, info, triggers):
                     info['joint_correct'] = info['partner_correct']
                 else:  # participant's decision is chosen
                     higher_conf_box.pos = (slider_marker.pos[0], slider.pos[1])
-                    higher_conf_box.lineColor = (0, 0.8, 0.8)
+                    higher_conf_box.lineColor = (245, 222, 179)
                     info['participant_chosen'] = True
                     info['partner_chosen'] = False
                     info['joint_correct'] = info['participant_correct']
@@ -1016,13 +1026,13 @@ def do_trial(win, mouse, gv, info, triggers):
                     info['trial_score'] = 1
                     higher_conf_box.lineColor = 'lawngreen'
                     feedback_txt = visual.TextStim(win=win, text='JOINT DECISION: CORRECT', height=35, pos=[0, -90],
-                                                   color='lawngreen')
+                                                   color='lawngreen', bold=True)
                 else:
                     trig = triggers['feedback_incorrect']
                     info['trial_score'] = 0
                     higher_conf_box.lineColor = 'red'
                     feedback_txt = visual.TextStim(win=win, text='JOINT DECISION: INCORRECT', height=35, pos=[0, -90],
-                                                   color='red')
+                                                   color='red', bold=True)
                 slider.draw()
                 slider_cover.draw()
                 rect_left.draw()
@@ -1046,12 +1056,12 @@ def do_trial(win, mouse, gv, info, triggers):
                     trig = triggers['feedback_correct']
                     higher_conf_box.lineColor = 'lawngreen'
                     feedback_txt = visual.TextStim(win=win, text='CORRECT', height=35, pos=[0, -90],
-                                                   color='lawngreen')
+                                                   color='lawngreen', bold=True)
                 else:
                     trig = triggers['feedback_incorrect']
                     higher_conf_box.lineColor = 'red'
                     feedback_txt = visual.TextStim(win=win, text='INCORRECT', height=35, pos=[0, -90],
-                                                   color='red')
+                                                   color='red', bold=True)
                 slider.draw()
                 slider_cover.draw()
                 rect_left.draw()
@@ -1090,11 +1100,11 @@ welcome_txt.draw()
 button.draw()
 button_txt.draw()
 win.flip()
-send_trigger(trig)
 exit_q()
 core.wait(0.2)
 while not mouse.isPressedIn(button):
     pass
+send_trigger(trig)
 if info['task'] == 's':
     welcome2_squircles_txt.draw()
 else:
