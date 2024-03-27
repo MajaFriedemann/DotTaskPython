@@ -6,4 +6,4 @@ This experiment can be set to be a non-strategic version where the participant s
 
 The code sends EEG triggers for responses / stimulus / feedback / etc events
 
-Code for Study 5
+Code for DPhil Study 5
